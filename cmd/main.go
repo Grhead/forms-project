@@ -38,12 +38,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to retrieve Spaces service %v", err)
 	}
-	//var formConfig = &forms.Form{
-	//	Info: &forms.Info{
-	//		Title:         "Форма обратной связи по мероприятию",
-	//		DocumentTitle: "Отзыв о конференции TechCon 2025",
-	//	},
-	//}
+	/*var formConfig = &forms.Form{
+		Info: &forms.Info{
+			Title:         "Форма обратной связи по мероприятию",
+			DocumentTitle: "Отзыв о конференции TechCon 2025",
+		},
+	}*/
+
 	itemsToAdd := []*forms.Item{
 		{
 			Title: "Как вас зовут?",
@@ -84,29 +85,24 @@ func main() {
 			},
 		})
 	}
-	//id, err := svc.Forms.Create(formConfig).Do()
-	//fmt.Println(id.FormId)
-	//_, err = svc.Forms.BatchUpdate("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", &forms.BatchUpdateFormRequest{
-	//	Requests: requests,
-	//}).Do()
-	//if err != nil {
-	//	log.Fatalf("Unable to create form: %v", err)
-	//}
+	/*id, err := svc.Forms.Create(formConfig).Do()
+	fmt.Println(id.FormId)
+	_, err = svc.Forms.BatchUpdate("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", &forms.BatchUpdateFormRequest{
+		Requests: requests,
+	}).Do()
+	if err != nil {
+		log.Fatalf("Unable to create form: %v", err)
+	}*/
 	do, err := svc.Forms.Responses.Get("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", "ACYDBNiM1N6j4QdrilDTpgVTSkKATHRYAtblFpOQk8vRETDevLlA2_Fii-gSWHEJmJGZYAU").Do()
 	if err != nil {
 		log.Fatalf("Unable to get form: %v", err)
 	}
 	for questionID, answer := range do.Answers {
-
-		// Большинство ответов (текст, выбор) хранятся в TextAnswers.
 		if answer.TextAnswers != nil && len(answer.TextAnswers.Answers) > 0 {
-			// В большинстве случаев (если вопрос не допускает несколько ответов),
-			// фактическое значение находится в первом элементе среза Answers.
 			answerValue := answer.TextAnswers.Answers[0].Value
 
 			log.Printf("ID Вопроса: %s (Ответ): %s", questionID, answerValue)
 		} else {
-			// Здесь вы можете добавить логику для других типов ответов (FileUpload, Scale, Date и т.д.)
 			log.Printf("ID Вопроса: %s: Ответ не является текстовым или пустым. Пропуск.", questionID)
 		}
 	}
@@ -119,7 +115,12 @@ func tokenFromFile(file string) *oauth2.Token {
 		log.Fatalf("Unable to open token file: %v", err)
 		return nil
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Fatalf("Unable to close token file: %v", err)
+		}
+	}(f)
 	tok := &oauth2.Token{}
 	err = json.NewDecoder(f).Decode(tok)
 	return tok
