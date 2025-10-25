@@ -4,23 +4,46 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/forms/v1"
 )
 
-type Config struct {
+type config struct {
 	ClientID     string
 	ClientSecret string
 	RedirectUrl  string
 }
 
-func NewConfig() (*Config, error) {
+type Provider interface {
+	NewConfig() (*oauth2.Config, error)
+}
+type EnvProvider struct{}
+
+func newInternalConfig() (*config, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
 	}
-	config := &Config{
+	cfg := &config{
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
 		RedirectUrl:  os.Getenv("REDIRECT_URL"),
+	}
+	return cfg, nil
+}
+
+func (e *EnvProvider) NewConfig() (*oauth2.Config, error) {
+	cfg, err := newInternalConfig()
+	if err != nil {
+		return nil, err
+	}
+	var config = &oauth2.Config{
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		Endpoint:     google.Endpoint,
+		Scopes:       []string{forms.FormsBodyScope, forms.FormsResponsesReadonlyScope},
+		RedirectURL:  cfg.RedirectUrl,
 	}
 	return config, nil
 }
