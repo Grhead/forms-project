@@ -2,3 +2,4 @@ configs/.env
 .idea/
 configs/token.json
 vendor/
+local/

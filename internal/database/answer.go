@@ -3,8 +3,8 @@ package database
 import "time"
 
 type dbAnswer struct {
-	AnswerId        string
+	AnswerId        string `gorm:"primaryKey"`
 	AnswerTimestamp time.Time
 	AnswerContent   string
-	FormsQuestionId []dbQuestionType
+	FormsQuestionId []dbFormsQuestion `gorm:"foreignKey:FormsQuestionId"`
 }

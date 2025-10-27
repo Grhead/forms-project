@@ -1,14 +1,14 @@
 package database
 
 type dbQuestion struct {
-	QuestionId       string
-	QuestionTitle    string
-	QuestionTypeId   []dbQuestionType
-	IsRequired       bool
-	PossibleAnswerId []dbPossibleAnswer
+	QuestionId               string `gorm:"primaryKey"`
+	QuestionTitle            string
+	QuestionTypeId           []dbQuestionType `gorm:"foreignKey:QuestionTypeId"`
+	IsRequired               bool
+	QuestionPossibleAnswerId []dbQuestionPossibleAnswer `gorm:"foreignKey:QuestionPossibleAnswerId"`
 }
 
 type dbQuestionType struct {
-	QuestionTypeId    string
+	QuestionTypeId    string `gorm:"primaryKey"`
 	QuestionTypeTitle string
 }
