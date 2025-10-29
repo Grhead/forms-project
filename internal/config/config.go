@@ -7,6 +7,8 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/forms/v1"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type config struct {
@@ -16,11 +18,13 @@ type config struct {
 }
 
 type Provider interface {
-	NewConfig() (*oauth2.Config, error)
+	NewFormConfig() (*oauth2.Config, error)
+	NewDbConfig() (*gorm.DB, error)
 }
 type EnvProvider struct{}
+type DbSQLiteProvider struct{}
 
-func (e *EnvProvider) NewConfig() (*oauth2.Config, error) {
+func (e *EnvProvider) NewFormConfig() (*oauth2.Config, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
@@ -38,4 +42,9 @@ func (e *EnvProvider) NewConfig() (*oauth2.Config, error) {
 		RedirectURL:  cfg.RedirectUrl,
 	}
 	return config, nil
+}
+
+func (e *DbSQLiteProvider) NewDbConfig(filename string) (*gorm.DB, error) {
+	db, err := gorm.Open(sqlite.Open(filename), &gorm.Config{})
+	return db, err
 }
