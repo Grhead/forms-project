@@ -10,6 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+type formHandler struct{}
+
 func Run() {
 	ctx := context.Background()
 	provider := &config.EnvProvider{}
@@ -18,17 +20,18 @@ func Run() {
 		panic(err)
 	}
 	router := chi.NewRouter()
+	rs := formHandler{}
 	router.Route("/api/v1/forms", func(r chi.Router) {
 		// GET /api/v1/forms/{id}
-		r.Get("/{id}", formHandler.GetFormByID)
+		r.Get("/{id}", rs.GetFormByID)
 		// POST /api/v1/forms
-		r.Post("/", formHandler.CreateForm)
+		r.Post("/yu", rs.CreateForm)
 	})
 
 	// Группировка маршрутов для Answers
 	router.Route("/api/v1/answers", func(r chi.Router) {
 		// POST /api/v1/answers (для отправки ответов)
-		r.Post("/", formHandler.SubmitAnswer)
+		r.Post("/", rs.SubmitAnswer)
 	})
 
 	// --- 5. Запуск HTTP-Сервера ---
@@ -41,4 +44,16 @@ func Run() {
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
 	}
+}
+
+func (rs formHandler) GetFormByID(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (rs formHandler) CreateForm(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (rs formHandler) SubmitAnswer(w http.ResponseWriter, r *http.Request) {
+
 }

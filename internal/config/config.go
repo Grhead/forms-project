@@ -20,7 +20,7 @@ type Provider interface {
 }
 type EnvProvider struct{}
 
-func newInternalConfig() (*config, error) {
+func (e *EnvProvider) NewConfig() (*oauth2.Config, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
@@ -29,14 +29,6 @@ func newInternalConfig() (*config, error) {
 		ClientID:     os.Getenv("CLIENT_ID"),
 		ClientSecret: os.Getenv("CLIENT_SECRET"),
 		RedirectUrl:  os.Getenv("REDIRECT_URL"),
-	}
-	return cfg, nil
-}
-
-func (e *EnvProvider) NewConfig() (*oauth2.Config, error) {
-	cfg, err := newInternalConfig()
-	if err != nil {
-		return nil, err
 	}
 	var config = &oauth2.Config{
 		ClientID:     cfg.ClientID,
