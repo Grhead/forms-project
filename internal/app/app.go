@@ -15,15 +15,15 @@ func Run() error {
 	//}
 	dbProvider := &config.DbSQLiteProvider{}
 	log.Println("Connecting to database ...")
-	db, err := dbProvider.NewDbConfig("C:\\Users\\Yomayo\\GolandProjects\\forms-project\\local\\forms.db")
+	db, err := dbProvider.NewDbConfig("C:\\Users\\egorm\\GolandProjects\\tusur-forms\\local\\forms.db")
 	log.Println("Successfully connected to database")
 	if err != nil {
 		return err
 	}
 	err = database.Migrate(db)
-	log.Println("Successfully migrated database")
 	if err != nil {
 		return err
 	}
+	log.Println("Successfully migrated database")
 	return nil
 }

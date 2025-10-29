@@ -5,7 +5,7 @@ import (
 )
 
 type dbForm struct {
-	FormId         string `gorm:"primaryKey"`
-	FormExternalId string
-	FormTimestamp  time.Time
+	Id         string `gorm:"primaryKey"`
+	ExternalId string
+	CreatedAt  time.Time
 }
