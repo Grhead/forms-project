@@ -1,12 +1,14 @@
 package database
 
 type dbPossibleAnswer struct {
-	Id      string `gorm:"primaryKey"`
-	Content string
+	PossibleAnswerId      string `gorm:"primaryKey"`
+	PossibleAnswerContent string
 }
 
 type dbQuestionPossibleAnswer struct {
-	Id               string             `gorm:"primaryKey"`
-	QuestionId       []dbQuestion       `gorm:"foreignKey:Id"`
-	PossibleAnswerId []dbPossibleAnswer `gorm:"foreignKey:Id"`
+	QuestionPossibleAnswerId string `gorm:"primaryKey"`
+	QuestionId               string
+	Question                 dbQuestion `gorm:"references:QuestionId"`
+	PossibleAnswerId         string
+	PossibleAnswer           dbPossibleAnswer `gorm:"references:PossibleAnswerId"`
 }

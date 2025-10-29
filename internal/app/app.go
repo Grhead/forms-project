@@ -4,6 +4,7 @@ import (
 	"log"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
+	"tusur-forms/internal/domain"
 )
 
 func Run() error {
@@ -16,14 +17,27 @@ func Run() error {
 	dbProvider := &config.DbSQLiteProvider{}
 	log.Println("Connecting to database ...")
 	db, err := dbProvider.NewDbConfig("C:\\Users\\egorm\\GolandProjects\\tusur-forms\\local\\forms.db")
+	if err != nil {
+		return err
+	}
 	log.Println("Successfully connected to database")
-	if err != nil {
-		return err
+	//err = database.Migrate(db)
+	//if err != nil {
+	//	return err
+	//}
+	//log.Println("Successfully migrated database")
+	t := &domain.QuestionType{
+		Id:    "1",
+		Title: "Первый тип",
 	}
-	err = database.Migrate(db)
-	if err != nil {
-		return err
+	database.CreateQuestionType(t, db)
+	q := &domain.Question{
+		Id:              "1",
+		Title:           "Вопрос №1",
+		Type:            *t,
+		IsRequired:      true,
+		PossibleAnswers: nil,
 	}
-	log.Println("Successfully migrated database")
+	database.CreateQuestion(q, db)
 	return nil
 }

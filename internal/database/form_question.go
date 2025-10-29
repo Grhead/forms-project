@@ -1,7 +1,9 @@
 package database
 
 type dbFormsQuestion struct {
-	Id         string       `gorm:"primaryKey"`
-	FormId     []dbForm     `gorm:"foreignKey:Id"`
-	QuestionId []dbQuestion `gorm:"foreignKey:Id"`
+	FormsQuestionId string `gorm:"primaryKey"`
+	FormId          string
+	Form            dbForm `gorm:"references:FormId"`
+	QuestionId      string
+	Question        dbQuestion `gorm:"references:QuestionId"`
 }
