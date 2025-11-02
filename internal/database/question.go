@@ -7,36 +7,42 @@ import (
 )
 
 type dbQuestion struct {
-	QuestionId     string `gorm:"primaryKey"`
-	QuestionTitle  string
-	QuestionTypeId string
-	QuestionType   dbQuestionType `gorm:"references:QuestionTypeId"`
-	IsRequired     bool
+	Id           string `gorm:"primaryKey"`
+	Title        string
+	TypeId       string
+	QuestionType dbQuestionType `gorm:"foreignKey:TypeId;references:Id"`
+	IsRequired   bool
 }
 
 type dbQuestionType struct {
-	QuestionTypeId    string `gorm:"primaryKey"`
-	QuestionTypeTitle string
+	Id    string `gorm:"primaryKey"`
+	Title string
 }
 
-func CreateQuestion(question *domain.Question, db *gorm.DB) {
-	dbquestion := dbQuestion{
-		QuestionId:     question.Id,
-		QuestionTitle:  question.Title,
-		IsRequired:     false,
-		QuestionTypeId: question.Type.Id,
+func CreateQuestion(q *domain.Question, db *gorm.DB) error {
+	dbQ := dbQuestion{
+		Id:         q.Id,
+		Title:      q.Title,
+		IsRequired: false,
+		TypeId:     q.Type.Id,
 	}
 
-	db.Create(&dbquestion)
-	db.Save(&dbquestion)
+	err := db.Create(&dbQ).Error
+	if err != nil {
+		return err
+	}
+	return db.Save(&dbQ).Error
 }
 
-func CreateQuestionType(qtype *domain.QuestionType, db *gorm.DB) {
-	dbtype := dbQuestionType{
-		QuestionTypeId:    qtype.Id,
-		QuestionTypeTitle: qtype.Title,
+func CreateQuestionType(qt *domain.QuestionType, db *gorm.DB) error {
+	dbQt := dbQuestionType{
+		Id:    qt.Id,
+		Title: qt.Title,
 	}
 
-	db.Create(&dbtype)
-	db.Save(&dbtype)
+	err := db.Create(&dbQt).Error
+	if err != nil {
+		return err
+	}
+	return db.Save(&dbQt).Error
 }

@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	"time"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
 	"tusur-forms/internal/domain"
@@ -26,18 +27,29 @@ func Run() error {
 	//	return err
 	//}
 	//log.Println("Successfully migrated database")
-	t := &domain.QuestionType{
-		Id:    "1",
-		Title: "Первый тип",
+	a := &domain.Answer{
+		Id:          "1",
+		SubmittedAt: time.Now(),
+		Content:     "Horns",
+		FormId:      "1",
+		QuestionId:  "1",
 	}
-	database.CreateQuestionType(t, db)
-	q := &domain.Question{
-		Id:              "1",
-		Title:           "Вопрос №1",
-		Type:            *t,
-		IsRequired:      true,
-		PossibleAnswers: nil,
+	err = database.CreateAnswer(a, db)
+	if err != nil {
+		return err
 	}
-	database.CreateQuestion(q, db)
+	//t := &domain.QuestionType{
+	//	Id:    "1",
+	//	Title: "Первый тип",
+	//}
+	//database.CreateQuestionType(t, db)
+	//q := &domain.Question{
+	//	Id:              "1",
+	//	Title:           "Вопрос №1",
+	//	Type:            *t,
+	//	IsRequired:      true,
+	//	PossibleAnswers: nil,
+	//}
+	//database.CreateQuestion(q, db)
 	return nil
 }

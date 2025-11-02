@@ -3,11 +3,12 @@ package database
 import "gorm.io/gorm"
 
 func Migrate(db *gorm.DB) error {
-	err := db.AutoMigrate(&dbForm{},
+	err := db.AutoMigrate(
+		&dbForm{},
+		&dbQuestionType{},
 		&dbQuestion{},
 		&dbAnswer{},
 		&dbFormsQuestion{},
-		&dbQuestionType{},
 		&dbPossibleAnswer{},
 		&dbQuestionPossibleAnswer{})
 	return err
