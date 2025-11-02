@@ -2,42 +2,54 @@ package app
 
 import (
 	"log"
-	"time"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
-	"tusur-forms/internal/domain"
 )
 
 func Run() error {
 	//ctx := context.Background()
-	//formProvider := &config.EnvProvider{}
-	//cfg, err := formProvider.NewFormConfig()
+
+	cfgProvider := &config.EnvConfigProvider{}
+	//formCfg, err := cfgProvider.LoadFormConfig()
 	//if err != nil {
 	//	return err
 	//}
+	dbCfg, err := cfgProvider.LoadDBConfig()
+	if err != nil {
+		return err
+	}
+
+	//oauthConfig :=config.NewOAuth2Config(formCfg)
+
 	dbProvider := &config.DbSQLiteProvider{}
-	log.Println("Connecting to database ...")
-	db, err := dbProvider.NewDbConfig("C:\\Users\\egorm\\GolandProjects\\tusur-forms\\local\\forms.db")
+	db, err := dbProvider.Connect(dbCfg)
 	if err != nil {
 		return err
 	}
-	log.Println("Successfully connected to database")
-	//err = database.Migrate(db)
+
+	exists, err := database.CheckExists(db)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		err = database.Migrate(db)
+		if err != nil {
+			return err
+		}
+		log.Println("Successfully migrated database")
+	}
+	//a := &domain.Answer{
+	//	Id:          "1",
+	//	SubmittedAt: time.Now(),
+	//	Content:     "Horns",
+	//	FormId:      "1",
+	//	QuestionId:  "1",
+	//}
+	//err = database.CreateAnswer(a, db)
 	//if err != nil {
 	//	return err
 	//}
-	//log.Println("Successfully migrated database")
-	a := &domain.Answer{
-		Id:          "1",
-		SubmittedAt: time.Now(),
-		Content:     "Horns",
-		FormId:      "1",
-		QuestionId:  "1",
-	}
-	err = database.CreateAnswer(a, db)
-	if err != nil {
-		return err
-	}
 	//t := &domain.QuestionType{
 	//	Id:    "1",
 	//	Title: "Первый тип",
