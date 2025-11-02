@@ -1,5 +1,7 @@
-configs/.env
-.idea/
+configs/.env.form
+configs/.env.database
 configs/token.json
+.idea/
+
 vendor/
 local/
