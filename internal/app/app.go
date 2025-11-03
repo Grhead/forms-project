@@ -10,16 +10,16 @@ func Run() error {
 	//ctx := context.Background()
 
 	cfgProvider := &config.EnvConfigProvider{}
-	//formCfg, err := cfgProvider.LoadFormConfig()
-	//if err != nil {
-	//	return err
-	//}
+	formCfg, err := cfgProvider.LoadFormConfig()
+	if err != nil {
+		return err
+	}
 	dbCfg, err := cfgProvider.LoadDBConfig()
 	if err != nil {
 		return err
 	}
 
-	//oauthConfig :=config.NewOAuth2Config(formCfg)
+	oauthConfig := config.NewOAuth2Config(formCfg)
 
 	dbProvider := &config.DbSQLiteProvider{}
 	db, err := dbProvider.Connect(dbCfg)

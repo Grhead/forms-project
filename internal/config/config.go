@@ -14,13 +14,13 @@ import (
 type FormConfig struct {
 	clientID     string
 	clientSecret string
-	redirectUrl  string
+	redirectURL  string
 }
 type DbConfig struct {
 	fileName string
 }
 
-type ConfigProvider interface {
+type CfgProvider interface {
 	LoadFormConfig() (FormConfig, error)
 	LoadDbConfig() (DbConfig, error)
 }
@@ -38,7 +38,7 @@ func (e *EnvConfigProvider) LoadFormConfig() (*FormConfig, error) {
 	cfg := &FormConfig{
 		clientID:     os.Getenv("CLIENT_ID"),
 		clientSecret: os.Getenv("CLIENT_SECRET"),
-		redirectUrl:  os.Getenv("REDIRECT_URL"),
+		redirectURL:  os.Getenv("REDIRECT_URL"),
 	}
 	return cfg, nil
 }
@@ -64,6 +64,6 @@ func NewOAuth2Config(cfg *FormConfig) *oauth2.Config {
 		ClientSecret: cfg.clientSecret,
 		Endpoint:     google.Endpoint,
 		Scopes:       []string{forms.FormsBodyScope, forms.FormsResponsesReadonlyScope},
-		RedirectURL:  cfg.redirectUrl,
+		RedirectURL:  cfg.redirectURL,
 	}
 }
