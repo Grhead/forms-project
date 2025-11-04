@@ -22,7 +22,7 @@ type dbQuestionPossibleAnswer struct {
 
 func CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question, db *gorm.DB) error {
 	dbPa := dbPossibleAnswer{
-		Id:      pa.Id,
+		Id:      uuid.NewString(),
 		Content: pa.Content,
 	}
 	err := createQuestionPossibleAnswer(&dbPa, q, db)

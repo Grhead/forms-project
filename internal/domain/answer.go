@@ -11,6 +11,5 @@ type Answer struct {
 }
 
 type PossibleAnswer struct {
-	Id      string
 	Content string
 }

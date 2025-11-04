@@ -8,6 +8,6 @@ type Form struct {
 	Title         string
 	DocumentTitle string
 	CreatedAt     time.Time
-	Questions     []Question
-	Answers       []Answer
+	Questions     []*Question
+	Answers       []*Answer
 }

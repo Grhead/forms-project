@@ -71,15 +71,43 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 	return f, nil
 }
 
-func (g *googleFormsAdapter) GetForm(formExternalId string) (domain.Form, error) {
-	id := formExternalId
+func (g *googleFormsAdapter) GetForm(formId string) (domain.Form, error) {
+	externalId := formId
+	response, err := g.googleClient.Forms.Get(externalId).Do()
+	if err != nil {
+		return domain.Form{}, err
+	}
+	questions := make([]*domain.Question, 0, len(response.Items))
+	for _, i := range response.Items {
+		tempQuestion := domain.Question{
+			Id:              i.QuestionItem.Question.QuestionId,
+			Title:           i.Title,
+			Description:     i.Description,
+			Type:            domain.QuestionType{},
+			IsRequired:      i.QuestionItem.Question.Required,
+			PossibleAnswers: nil,
+		}
+		if i.QuestionItem.Question.ChoiceQuestion.Type == string(domain.TypeCheckbox) ||
+			i.QuestionItem.Question.ChoiceQuestion.Type == string(domain.TypeRadio) {
+			answers := make([]*domain.PossibleAnswer, 0, len(response.Items))
+
+			for _, q := range i.QuestionItem.Question.ChoiceQuestion.Options {
+				pAnswer := domain.PossibleAnswer{
+					Content: q.Value,
+				}
+				answers = append(answers, &pAnswer)
+			}
+		}
+		questions = append(questions, &tempQuestion)
+
+	}
 	f := domain.Form{
-		Id:            "",
-		ExternalId:    id,
-		Title:         "",
-		DocumentTitle: "",
+		Id:            formId,
+		ExternalId:    externalId,
+		Title:         response.Info.Title,
+		DocumentTitle: response.Info.DocumentTitle,
 		CreatedAt:     time.Time{},
-		Questions:     nil,
+		Questions:     questions,
 		Answers:       nil,
 	}
 	return f, nil
@@ -93,7 +121,7 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 			ItemId:      uuid.NewString(),
 			Title:       question.Title,
 		}
-		googleQuestion := &forms.Question{
+		googleQuestion := forms.Question{
 			QuestionId: uuid.NewString(),
 			Required:   question.IsRequired,
 		}
@@ -120,7 +148,7 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 				Options: opts,
 			}
 
-			tempItem.QuestionItem.Question = googleQuestion
+			tempItem.QuestionItem.Question = &googleQuestion
 			formItems = append(formItems, tempItem)
 		}
 	}

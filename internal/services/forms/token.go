@@ -30,7 +30,10 @@ func saveToken(token *oauth2.Token, filename string) error {
 	if err != nil {
 		return err
 	}
-	f.Close()
+	err = f.Close()
+	if err != nil {
+		return err
+	}
 	if err = json.NewEncoder(f).Encode(token); err != nil {
 		return err
 	}
@@ -42,7 +45,10 @@ func readToken(filename string) (*oauth2.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.Close()
+	err = f.Close()
+	if err != nil {
+		return nil, err
+	}
 	token := &oauth2.Token{}
 	if err = json.NewDecoder(f).Decode(token); err != nil {
 		return nil, err

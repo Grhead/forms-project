@@ -39,7 +39,7 @@ func CreateQuestion(q *domain.Question, db *gorm.DB) error {
 func CreateQuestionType(qt *domain.QuestionType, db *gorm.DB) error {
 	dbQt := dbQuestionType{
 		Id:    qt.Id,
-		Title: qt.Title,
+		Title: string(qt.Title),
 	}
 
 	err := db.Create(&dbQt).Error

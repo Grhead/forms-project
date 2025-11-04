@@ -18,7 +18,6 @@ type QuestionTypeTitles string
 
 const TypeCheckbox QuestionTypeTitles = "CHECKBOX"
 const TypeRadio QuestionTypeTitles = "RADIO"
-
 const TypeText QuestionTypeTitles = "TEXT"
 
 //const TypeDate QuestionTypeTitles = "DATE"
