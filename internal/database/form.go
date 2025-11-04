@@ -8,16 +8,18 @@ import (
 )
 
 type dbForm struct {
-	Id         string `gorm:"primaryKey"`
-	ExternalId string
-	CreatedAt  time.Time
+	Id            string `gorm:"primaryKey"`
+	Title         string
+	DocumentTitle string
+	ExternalId    string
+	CreatedAt     time.Time
 }
 
 func CreateForm(f *domain.Form, db *gorm.DB) error {
 	dbF := dbForm{
 		Id:         f.Id,
 		ExternalId: f.ExternalId,
-		CreatedAt:  time.Now(),
+		CreatedAt:  f.CreatedAt,
 	}
 
 	err := db.Create(&dbF).Error

@@ -1,4 +1,4 @@
-package internal
+package services
 
 import (
 	"context"
@@ -8,17 +8,21 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func createAuthLink(conf *oauth2.Config) string {
+func CreateAuthLink(conf *oauth2.Config) string {
 	authURL := conf.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	return authURL
 }
 
-func exchangeToken(ctx context.Context, conf *oauth2.Config, code string) (*oauth2.Token, error) {
-	tok, err := conf.Exchange(ctx, code)
+func ExchangeToken(ctx context.Context, conf *oauth2.Config, code string, filename string) error {
+	token, err := conf.Exchange(ctx, code)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return tok, nil
+	err = saveToken(token, filename)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func saveToken(token *oauth2.Token, filename string) error {

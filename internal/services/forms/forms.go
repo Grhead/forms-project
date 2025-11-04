@@ -1,17 +1,130 @@
-package internal
+package services
 
-import "google.golang.org/api/forms/v1"
+import (
+	"context"
+	"time"
+	"tusur-forms/internal/domain"
 
-func createForms(Title string, FormTitle string) (forms.Form, error) {
+	"github.com/google/uuid"
+	"golang.org/x/oauth2"
+	"google.golang.org/api/forms/v1"
+	"google.golang.org/api/option"
+)
 
-	return forms.Form{}, nil
+type FormServiceProvider interface {
+	NewService(ctx context.Context, filename string) (FormService, error)
 }
-func getForm() {
 
+type FormService interface {
+	NewForm(title string, documentTitle string) (domain.Form, error)
+	GetForm(formExternalId string) (domain.Form, error)
+	SetQuestions(form domain.Form, questions []*domain.Question) (domain.Form, error)
+	GetResponseList()
+	GetResponse()
 }
-func setItems(items []*forms.Item) {
-	var requests []*forms.Request
-	for i, item := range items {
+
+type GoogleForms struct {
+	OauthCfg *oauth2.Config
+}
+type googleFormsAdapter struct {
+	googleClient *forms.Service
+}
+
+func (g *GoogleForms) NewService(ctx context.Context, filename string) (FormService, error) {
+	token, err := readToken(filename)
+	if err != nil {
+		return nil, err
+	}
+	TokenSource := g.OauthCfg.TokenSource(ctx, token)
+	svc, err := forms.NewService(ctx, option.WithTokenSource(TokenSource))
+	if err != nil {
+		return nil, err
+	}
+	adapter := &googleFormsAdapter{
+		googleClient: svc,
+	}
+
+	return adapter, nil
+}
+
+func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain.Form, error) {
+	gf := &forms.Form{
+		Info: &forms.Info{
+			Title:         title,
+			DocumentTitle: documentTitle,
+		},
+	}
+	result, err := g.googleClient.Forms.Create(gf).Do()
+	if err != nil {
+		return domain.Form{}, err
+	}
+
+	f := domain.Form{
+		Id:            uuid.NewString(),
+		ExternalId:    result.FormId,
+		Title:         result.Info.Title,
+		DocumentTitle: result.Info.DocumentTitle,
+		CreatedAt:     time.Now(),
+		Questions:     nil,
+		Answers:       nil,
+	}
+	return f, nil
+}
+
+func (g *googleFormsAdapter) GetForm(formExternalId string) (domain.Form, error) {
+	id := formExternalId
+	f := domain.Form{
+		Id:            "",
+		ExternalId:    id,
+		Title:         "",
+		DocumentTitle: "",
+		CreatedAt:     time.Time{},
+		Questions:     nil,
+		Answers:       nil,
+	}
+	return f, nil
+}
+func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.Question) (domain.Form, error) {
+	var formItems []*forms.Item
+	var requests = make([]*forms.Request, 0, len(formItems))
+	for _, question := range questions {
+		tempItem := &forms.Item{
+			Description: question.Description,
+			ItemId:      uuid.NewString(),
+			Title:       question.Title,
+		}
+		googleQuestion := &forms.Question{
+			QuestionId: uuid.NewString(),
+			Required:   question.IsRequired,
+		}
+
+		switch question.Type.Title {
+		case domain.TypeText:
+			googleQuestion.TextQuestion = &forms.TextQuestion{}
+		case domain.TypeCheckbox:
+			var opts = make([]*forms.Option, 0, len(question.PossibleAnswers))
+			for _, pa := range question.PossibleAnswers {
+				opts = append(opts, &forms.Option{Value: pa.Content})
+			}
+			googleQuestion.ChoiceQuestion = &forms.ChoiceQuestion{
+				Type:    string(domain.TypeCheckbox),
+				Options: opts,
+			}
+		case domain.TypeRadio:
+			var opts = make([]*forms.Option, 0, len(question.PossibleAnswers))
+			for _, pa := range question.PossibleAnswers {
+				opts = append(opts, &forms.Option{Value: pa.Content})
+			}
+			googleQuestion.ChoiceQuestion = &forms.ChoiceQuestion{
+				Type:    string(domain.TypeRadio),
+				Options: opts,
+			}
+
+			tempItem.QuestionItem.Question = googleQuestion
+			formItems = append(formItems, tempItem)
+		}
+	}
+	for i, item := range formItems {
 		requests = append(requests, &forms.Request{
 			CreateItem: &forms.CreateItemRequest{
 				Item: item,
@@ -22,87 +135,34 @@ func setItems(items []*forms.Item) {
 			},
 		})
 	}
+	response, err := g.googleClient.Forms.BatchUpdate(
+		form.ExternalId,
+		&forms.BatchUpdateFormRequest{Requests: requests}).
+		Do()
+	if err != nil {
+		return domain.Form{}, err
+	}
+	result, err := g.GetForm(response.Form.FormId)
+	if err != nil {
+		return domain.Form{}, err
+	}
+	return result, nil
 }
-func getResponses() {
+func (g *googleFormsAdapter) GetResponse()     {}
+func (g *googleFormsAdapter) GetResponseList() {}
 
-}
-func detailResponses() {
-
-}
-
-
-{
-svc, err := forms.NewService(ctx, option.WithTokenSource(TokenSource))
-if err != nil {
-log.Fatalf("Unable to retrieve Spaces service %v", err)
-}
-/*var formConfig = &forms.Form{
-	Info: &forms.Info{
-		Title:         "Форма обратной связи по мероприятию",
-		DocumentTitle: "Отзыв о конференции TechCon 2025",
-	},
-}*/
-
-itemsToAdd := []*forms.Item{
-{
-Title: "Как вас зовут?",
-QuestionItem: &forms.QuestionItem{
-Question: &forms.Question{
-QuestionId:   "1001",
-TextQuestion: &forms.TextQuestion{},
-},
-},
-},
-{
-Title: "Какова ваша общая оценка мероприятия?",
-QuestionItem: &forms.QuestionItem{
-Question: &forms.Question{
-QuestionId: "1002",
-ChoiceQuestion: &forms.ChoiceQuestion{
-Type: "RADIO",
-Options: []*forms.Option{
-{Value: "Отлично"},
-{Value: "Хорошо"},
-{Value: "Удовлетворительно"},
-{Value: "Плохо"},
-},
-},
-},
-},
-},
-}
-var requests []*forms.Request
-for i, item := range itemsToAdd {
-requests = append(requests, &forms.Request{
-CreateItem: &forms.CreateItemRequest{
-Item: item,
-Location: &forms.Location{
-Index:           int64(i),
-ForceSendFields: []string{"Index"},
-},
-},
-})
-}
-/*id, err := svc.Forms.Create(formConfig).Do()
-fmt.Println(id.FormId)
-_, err = svc.Forms.BatchUpdate("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", &forms.BatchUpdateFormRequest{
-	Requests: requests,
-}).Do()
-if err != nil {
-	log.Fatalf("Unable to create form: %v", err)
-}*/
-do, err := svc.Forms.Responses.Get("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", "ACYDBNiM1N6j4QdrilDTpgVTSkKATHRYAtblFpOQk8vRETDevLlA2_Fii-gSWHEJmJGZYAU").Do()
-if err != nil {
-log.Fatalf("Unable to get form: %v", err)
-}
-for questionID, answer := range do.Answers {
-if answer.TextAnswers != nil && len(answer.TextAnswers.Answers) > 0 {
-answerValue := answer.TextAnswers.Answers[0].Value
-
-log.Printf("ID Вопроса: %s (Ответ): %s", questionID, answerValue)
-} else {
-log.Printf("ID Вопроса: %s: Ответ не является текстовым или пустым. Пропуск.", questionID)
-}
-}
-log.Println("---------------------------------------")
-}
+//do, err := svc.Forms.Responses.Get("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", "ACYDBNiM1N6j4QdrilDTpgVTSkKATHRYAtblFpOQk8vRETDevLlA2_Fii-gSWHEJmJGZYAU").Do()
+//if err != nil {
+//log.Fatalf("Unable to get form: %v", err)
+//}
+//for questionID, answer := range do.Answers {
+//if answer.TextAnswers != nil && len(answer.TextAnswers.Answers) > 0 {
+//answerValue := answer.TextAnswers.Answers[0].Value
+//
+//log.Printf("ID Вопроса: %s (Ответ): %s", questionID, answerValue)
+//} else {
+//log.Printf("ID Вопроса: %s: Ответ не является текстовым или пустым. Пропуск.", questionID)
+//}
+//}
+//log.Println("---------------------------------------")
+//}

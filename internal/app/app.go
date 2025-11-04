@@ -1,13 +1,15 @@
 package app
 
 import (
+	"context"
 	"log"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
+	"tusur-forms/internal/services/forms"
 )
 
 func Run() error {
-	//ctx := context.Background()
+	ctx := context.Background()
 
 	cfgProvider := &config.EnvConfigProvider{}
 	formCfg, err := cfgProvider.LoadFormConfig()
@@ -18,9 +20,14 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-
 	oauthConfig := config.NewOAuth2Config(formCfg)
-
+	googleProvider := services.GoogleForms{
+		OauthCfg: oauthConfig,
+	}
+	service, err := googleProvider.NewService(ctx, "token.json")
+	if err != nil {
+		return err
+	}
 	dbProvider := &config.DbSQLiteProvider{}
 	db, err := dbProvider.Connect(dbCfg)
 	if err != nil {
@@ -39,6 +46,7 @@ func Run() error {
 		}
 		log.Println("Successfully migrated database")
 	}
+
 	//a := &domain.Answer{
 	//	Id:          "1",
 	//	SubmittedAt: time.Now(),

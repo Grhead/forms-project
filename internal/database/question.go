@@ -9,6 +9,7 @@ import (
 type dbQuestion struct {
 	Id           string `gorm:"primaryKey"`
 	Title        string
+	Description  string
 	TypeId       string
 	QuestionType dbQuestionType `gorm:"foreignKey:TypeId;references:Id"`
 	IsRequired   bool
@@ -21,10 +22,11 @@ type dbQuestionType struct {
 
 func CreateQuestion(q *domain.Question, db *gorm.DB) error {
 	dbQ := dbQuestion{
-		Id:         q.Id,
-		Title:      q.Title,
-		IsRequired: false,
-		TypeId:     q.Type.Id,
+		Id:          q.Id,
+		Title:       q.Title,
+		Description: q.Description,
+		IsRequired:  false,
+		TypeId:      q.Type.Id,
 	}
 
 	err := db.Create(&dbQ).Error
