@@ -177,8 +177,8 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 	}
 	return result, nil
 }
-func (g *googleFormsAdapter) GetResponse()     {}
-func (g *googleFormsAdapter) GetResponseList() {}
+func (g *googleFormsAdapter) GetResponse()     {} //TODO create test
+func (g *googleFormsAdapter) GetResponseList() {} //TODO create test
 
 //do, err := svc.Forms.Responses.Get("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", "ACYDBNiM1N6j4QdrilDTpgVTSkKATHRYAtblFpOQk8vRETDevLlA2_Fii-gSWHEJmJGZYAU").Do()
 //if err != nil {
