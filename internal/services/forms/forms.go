@@ -89,14 +89,15 @@ func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
 		}
 		if i.QuestionItem.Question.ChoiceQuestion.Type == string(domain.TypeCheckbox) ||
 			i.QuestionItem.Question.ChoiceQuestion.Type == string(domain.TypeRadio) {
-			answers := make([]*domain.PossibleAnswer, 0, len(response.Items))
+			answers := make([]domain.PossibleAnswer, 0, len(response.Items))
 
 			for _, q := range i.QuestionItem.Question.ChoiceQuestion.Options {
 				pAnswer := domain.PossibleAnswer{
 					Content: q.Value,
 				}
-				answers = append(answers, &pAnswer)
+				answers = append(answers, pAnswer)
 			}
+		tempQuestion.PossibleAnswers = answers;
 		}
 		questions = append(questions, &tempQuestion)
 
