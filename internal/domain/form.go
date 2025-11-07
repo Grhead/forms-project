@@ -3,8 +3,8 @@ package domain
 import "time"
 
 type Form struct {
-	Id            string
-	ExternalId    string
+	ID            string
+	ExternalID    string
 	Title         string
 	DocumentTitle string
 	CreatedAt     time.Time

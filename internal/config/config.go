@@ -16,19 +16,19 @@ type FormConfig struct {
 	clientSecret string
 	redirectURL  string
 }
-type DbConfig struct {
+type DBConfig struct {
 	fileName string
 }
 
 type CfgProvider interface {
 	LoadFormConfig() (FormConfig, error)
-	LoadDbConfig() (DbConfig, error)
+	LoadDbConfig() (DBConfig, error)
 }
 type DatabaseProvider interface {
-	Connect(cfg DbConfig) (*gorm.DB, error)
+	Connect(cfg DBConfig) (*gorm.DB, error)
 }
 type EnvConfigProvider struct{}
-type DbSQLiteProvider struct{}
+type DBSQLiteProvider struct{}
 
 func (e *EnvConfigProvider) LoadFormConfig() (*FormConfig, error) {
 	err := godotenv.Load("configs/.env.form")
@@ -43,18 +43,18 @@ func (e *EnvConfigProvider) LoadFormConfig() (*FormConfig, error) {
 	return cfg, nil
 }
 
-func (e *EnvConfigProvider) LoadDBConfig() (*DbConfig, error) {
+func (e *EnvConfigProvider) LoadDBConfig() (*DBConfig, error) {
 	err := godotenv.Load("configs/.env.database")
 	if err != nil {
 		return nil, err
 	}
-	cfg := &DbConfig{
+	cfg := &DBConfig{
 		fileName: os.Getenv("FILE_NAME"),
 	}
 	return cfg, nil
 }
 
-func (s *DbSQLiteProvider) Connect(cfg *DbConfig) (*gorm.DB, error) {
+func (s *DBSQLiteProvider) Connect(cfg *DBConfig) (*gorm.DB, error) {
 	return gorm.Open(sqlite.Open(cfg.fileName), &gorm.Config{})
 }
 

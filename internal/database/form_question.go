@@ -8,19 +8,19 @@ import (
 )
 
 type dbFormsQuestion struct {
-	Id         string `gorm:"primaryKey"`
-	FormId     string
-	Form       dbForm `gorm:"foreignKey:FormId;references:Id"`
-	QuestionId string
-	Question   dbQuestion `gorm:"foreignKey:QuestionId;references:Id"`
+	ID         string `gorm:"primaryKey"`
+	FormID     string
+	Form       dbForm `gorm:"foreignKey:FormID;references:ID"`
+	QuestionID string
+	Question   dbQuestion `gorm:"foreignKey:QuestionID;references:ID"`
 }
 
 func CreateFormsQuestion(f *domain.Form, q *domain.Question, db *gorm.DB) error {
 	dbQ := dbFormsQuestion{
-		Id:         uuid.NewString(),
-		FormId:     f.Id,
+		ID:         uuid.NewString(),
+		FormID:     f.ID,
 		Form:       dbForm{},
-		QuestionId: q.Id,
+		QuestionID: q.ID,
 		Question:   dbQuestion{},
 	}
 

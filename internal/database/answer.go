@@ -8,23 +8,23 @@ import (
 )
 
 type dbAnswer struct {
-	Id              string `gorm:"primaryKey"`
+	ID              string `gorm:"primaryKey"`
 	SubmittedAt     time.Time
 	Content         string
-	FormsQuestionId string
-	FormsQuestion   dbFormsQuestion `gorm:"foreignKey:FormsQuestionId;references:Id"`
+	FormsQuestionID string
+	FormsQuestion   dbFormsQuestion `gorm:"foreignKey:FormsQuestionID;references:ID"`
 }
 
 func CreateAnswer(a *domain.Answer, db *gorm.DB) error {
-	fq, err := getFormsQuestionId(a, db)
+	fq, err := getFormsQuestionID(a, db)
 	if err != nil {
 		return err
 	}
 	dbQ := dbAnswer{
-		Id:              a.Id,
+		ID:              a.ID,
 		SubmittedAt:     a.SubmittedAt,
 		Content:         a.Content,
-		FormsQuestionId: fq.Id,
+		FormsQuestionID: fq.ID,
 		FormsQuestion:   dbFormsQuestion{},
 	}
 	err = db.Create(&dbQ).Error
@@ -34,9 +34,9 @@ func CreateAnswer(a *domain.Answer, db *gorm.DB) error {
 	return db.Save(&dbQ).Error
 }
 
-func getFormsQuestionId(a *domain.Answer, db *gorm.DB) (dbFormsQuestion, error) {
+func getFormsQuestionID(a *domain.Answer, db *gorm.DB) (dbFormsQuestion, error) {
 	var fq dbFormsQuestion
-	err := db.Where("form_id = ? AND question_id = ?", a.FormId, a.QuestionId).First(&fq).Error
+	err := db.Where("form_id = ? AND question_id = ?", a.FormID, a.QuestionID).First(&fq).Error
 	return fq, err
 
 }

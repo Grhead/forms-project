@@ -3,11 +3,11 @@ package domain
 import "time"
 
 type Answer struct {
-	Id          string
+	ID          string
 	SubmittedAt time.Time
 	Content     string
-	FormId      string
-	QuestionId  string
+	FormID      string
+	QuestionID  string
 }
 
 type PossibleAnswer struct {

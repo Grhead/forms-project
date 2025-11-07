@@ -28,7 +28,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	dbProvider := &config.DbSQLiteProvider{}
+	dbProvider := &config.DBSQLiteProvider{}
 	db, err := dbProvider.Connect(dbCfg)
 	if err != nil {
 		return err
@@ -48,23 +48,23 @@ func Run() error {
 	}
 
 	//a := &domain.Answer{
-	//	Id:          "1",
+	//	ID:          "1",
 	//	SubmittedAt: time.Now(),
 	//	Content:     "Horns",
-	//	FormId:      "1",
-	//	QuestionId:  "1",
+	//	FormID:      "1",
+	//	QuestionID:  "1",
 	//}
 	//err = database.CreateAnswer(a, db)
 	//if err != nil {
 	//	return err
 	//}
 	//t := &domain.QuestionType{
-	//	Id:    "1",
+	//	ID:    "1",
 	//	Title: "Первый тип",
 	//}
 	//database.CreateQuestionType(t, db)
 	//q := &domain.Question{
-	//	Id:              "1",
+	//	ID:              "1",
 	//	Title:           "Вопрос №1",
 	//	Type:            *t,
 	//	IsRequired:      true,

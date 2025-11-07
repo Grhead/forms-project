@@ -17,7 +17,7 @@ type FormServiceProvider interface {
 
 type FormService interface {
 	NewForm(title string, documentTitle string) (domain.Form, error)
-	GetForm(formExternalId string) (domain.Form, error)
+	GetForm(formExternalID string) (domain.Form, error)
 	SetQuestions(form domain.Form, questions []*domain.Question) (domain.Form, error)
 	GetResponseList()
 	GetResponse()
@@ -60,8 +60,8 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 	}
 
 	f := domain.Form{
-		Id:            uuid.NewString(),
-		ExternalId:    result.FormId,
+		ID:            uuid.NewString(),
+		ExternalID:    result.FormId,
 		Title:         result.Info.Title,
 		DocumentTitle: result.Info.DocumentTitle,
 		CreatedAt:     time.Now(),
@@ -71,16 +71,16 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 	return f, nil
 }
 
-func (g *googleFormsAdapter) GetForm(formId string) (domain.Form, error) {
-	externalId := formId
-	response, err := g.googleClient.Forms.Get(externalId).Do()
+func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
+	externalID := formID
+	response, err := g.googleClient.Forms.Get(externalID).Do()
 	if err != nil {
 		return domain.Form{}, err
 	}
 	questions := make([]*domain.Question, 0, len(response.Items))
 	for _, i := range response.Items {
 		tempQuestion := domain.Question{
-			Id:              i.QuestionItem.Question.QuestionId,
+			ID:              i.QuestionItem.Question.QuestionId,
 			Title:           i.Title,
 			Description:     i.Description,
 			Type:            domain.QuestionType{},
@@ -102,8 +102,8 @@ func (g *googleFormsAdapter) GetForm(formId string) (domain.Form, error) {
 
 	}
 	f := domain.Form{
-		Id:            formId,
-		ExternalId:    externalId,
+		ID:            formID,
+		ExternalID:    externalID,
 		Title:         response.Info.Title,
 		DocumentTitle: response.Info.DocumentTitle,
 		CreatedAt:     time.Time{},
@@ -164,7 +164,7 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 		})
 	}
 	response, err := g.googleClient.Forms.BatchUpdate(
-		form.ExternalId,
+		form.ExternalID,
 		&forms.BatchUpdateFormRequest{Requests: requests}).
 		Do()
 	if err != nil {

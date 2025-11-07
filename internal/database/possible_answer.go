@@ -8,21 +8,21 @@ import (
 )
 
 type dbPossibleAnswer struct {
-	Id      string `gorm:"primaryKey"`
+	ID      string `gorm:"primaryKey"`
 	Content string
 }
 
 type dbQuestionPossibleAnswer struct {
-	Id               string `gorm:"primaryKey"`
-	QuestionId       string
-	Question         dbQuestion `gorm:"foreignKey:QuestionId;references:Id"`
-	PossibleAnswerId string
-	PossibleAnswer   dbPossibleAnswer `gorm:"foreignKey:PossibleAnswerId;references:Id"`
+	ID               string `gorm:"primaryKey"`
+	QuestionID       string
+	Question         dbQuestion `gorm:"foreignKey:QuestionID;references:ID"`
+	PossibleAnswerID string
+	PossibleAnswer   dbPossibleAnswer `gorm:"foreignKey:PossibleAnswerID;references:ID"`
 }
 
 func CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question, db *gorm.DB) error {
 	dbPa := dbPossibleAnswer{
-		Id:      uuid.NewString(),
+		ID:      uuid.NewString(),
 		Content: pa.Content,
 	}
 	err := createQuestionPossibleAnswer(&dbPa, q, db)
@@ -38,10 +38,10 @@ func CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question, db *gor
 
 func createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question, db *gorm.DB) error {
 	dbF := dbQuestionPossibleAnswer{
-		Id:               uuid.NewString(),
-		QuestionId:       q.Id,
+		ID:               uuid.NewString(),
+		QuestionID:       q.ID,
 		Question:         dbQuestion{},
-		PossibleAnswerId: pa.Id,
+		PossibleAnswerID: pa.ID,
 		PossibleAnswer:   dbPossibleAnswer{},
 	}
 
