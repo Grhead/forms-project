@@ -4,7 +4,6 @@ import (
 	"tusur-forms/internal/domain"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type dbPossibleAnswer struct {
@@ -20,23 +19,23 @@ type dbQuestionPossibleAnswer struct {
 	PossibleAnswer   dbPossibleAnswer `gorm:"foreignKey:PossibleAnswerID;references:ID"`
 }
 
-func CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question, db *gorm.DB) error {
+func (g *GormRepository) CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question) (*dbPossibleAnswer, error) {
 	dbPa := dbPossibleAnswer{
 		ID:      uuid.NewString(),
 		Content: pa.Content,
 	}
-	err := createQuestionPossibleAnswer(&dbPa, q, db)
+	err := g.createQuestionPossibleAnswer(&dbPa, q)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	err = db.Create(&dbPa).Error
+	err = g.db.Create(&dbPa).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return db.Save(&dbPa).Error
+	return &dbPa, g.db.Save(&dbPa).Error
 }
 
-func createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question, db *gorm.DB) error {
+func (g *GormRepository) createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question) error {
 	dbF := dbQuestionPossibleAnswer{
 		ID:               uuid.NewString(),
 		QuestionID:       q.ID,
@@ -45,9 +44,20 @@ func createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question, db *
 		PossibleAnswer:   dbPossibleAnswer{},
 	}
 
-	err := db.Create(&dbF).Error
+	err := g.db.Create(&dbF).Error
 	if err != nil {
 		return err
 	}
-	return db.Save(&dbF).Error
+	return g.db.Save(&dbF).Error
+}
+
+func (g *GormRepository) getPossibleAnswer(a *domain.PossibleAnswer) (*dbPossibleAnswer, error) {
+	var fq []*dbPossibleAnswer
+	err := g.db.Where("content = ?", a.Content).Limit(3).Find(&fq)
+	if err != nil {
+		return nil, err.Error
+	} else if len(fq) == 0 {
+		return nil, nil
+	}
+	return	fq[0], nil
 }

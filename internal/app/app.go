@@ -2,12 +2,12 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
 	"tusur-forms/internal/domain"
-	services "tusur-forms/internal/services/forms"
+	"tusur-forms/internal/services/google"
+	"tusur-forms/internal/services/orchectrators"
 
 	"github.com/google/uuid"
 )
@@ -26,13 +26,14 @@ func Run() error {
 		return err
 	}
 	oauthConfig := config.NewOAuth2Config(formCfg)
+	log.Printf("New OAuth2 Config generated")
 	tokenConfig, err := config.ReadToken(filename)
-	tokenSource := oauthConfig.TokenSource(ctx, tokenConfig)
 	if err != nil {
-		log.Fatal("After token source")
 		return err
 	}
-	googleProvider := services.GoogleForms{
+	tokenSource := oauthConfig.TokenSource(ctx, tokenConfig)
+
+	googleProvider := google.GoogleForms{
 		TokenSource: tokenSource,
 	}
 	service, err := googleProvider.NewService(ctx)
@@ -45,30 +46,21 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-
-	exists, err := database.CheckExists(db)
+	gormRepo := database.NewGormRepository(db)
+	exists, err := gormRepo.CheckExists()
 	if err != nil {
 		return err
 	}
 
 	if !exists {
-		err = database.Migrate(db)
+		err = gormRepo.Migrate()
 		if err != nil {
 			return err
 		}
 		log.Println("Successfully migrated database")
 	}
-
-	form, err := service.NewForm("Testing на паре", "Testing")
-	if err != nil {
-		return err
-	}
-	fmt.Println("Form created")
-	form, err = service.GetForm(form.ExternalID)
-	if err != nil {
-		return err
-	}
-	fmt.Println(form)
+	newOrchesctrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
+	
 	quest := domain.Question{
 		ID:          uuid.NewString(),
 		Title:       "Simple Question",
@@ -80,10 +72,15 @@ func Run() error {
 		IsRequired:      true,
 		PossibleAnswers: []domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
 	}
-	_, err = service.SetQuestions(form, []*domain.Question{&quest})
+	_, err = newOrchesctrator.CheckoutForm("Testing на паре", "Testing", []*domain.Question{&quest})
 	if err != nil {
 		return err
 	}
+
+	/* _, err = service.SetQuestions(form, )
+	if err != nil {
+		return err
+	} */
 
 	// service.GetForm()
 

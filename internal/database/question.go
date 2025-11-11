@@ -1,9 +1,8 @@
 package database
 
 import (
+	"log"
 	"tusur-forms/internal/domain"
-
-	"gorm.io/gorm"
 )
 
 type dbQuestion struct {
@@ -20,7 +19,7 @@ type dbQuestionType struct {
 	Title string
 }
 
-func CreateQuestion(q *domain.Question, db *gorm.DB) error {
+func (g *GormRepository) CreateQuestion(q *domain.Question) error {
 	dbQ := dbQuestion{
 		ID:          q.ID,
 		Title:       q.Title,
@@ -29,22 +28,37 @@ func CreateQuestion(q *domain.Question, db *gorm.DB) error {
 		TypeID:      q.Type.ID,
 	}
 
-	err := db.Create(&dbQ).Error
+	err := g.db.Create(&dbQ).Error
 	if err != nil {
 		return err
 	}
-	return db.Save(&dbQ).Error
+	if q.Type.Title == domain.TypeCheckbox || q.Type.Title == domain.TypeRadio {
+		for _, item := range q.PossibleAnswers {
+			paID, err := g.getPossibleAnswer(&item)
+			if err != nil {
+					return err
+			}
+			if paID == nil {
+				_, err = g.CreatePossibleAnswer(&item, q)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return g.db.Save(&dbQ).Error
 }
 
-func CreateQuestionType(qt *domain.QuestionType, db *gorm.DB) error {
+func (g *GormRepository) CreateQuestionType(qt *domain.QuestionType) error {
 	dbQt := dbQuestionType{
 		ID:    qt.ID,
 		Title: string(qt.Title),
 	}
 
-	err := db.Create(&dbQt).Error
+	err := g.db.Create(&dbQt).Error
 	if err != nil {
 		return err
 	}
-	return db.Save(&dbQt).Error
+	return g.db.Save(&dbQt).Error
 }

@@ -1,11 +1,7 @@
 package database
 
-import (
-	"gorm.io/gorm"
-)
-
-func Migrate(db *gorm.DB) error {
-	err := db.AutoMigrate(
+func (g *GormRepository) Migrate() error {
+	err := g.db.AutoMigrate(
 		&dbForm{},
 		&dbQuestionType{},
 		&dbQuestion{},
@@ -16,7 +12,7 @@ func Migrate(db *gorm.DB) error {
 	return err
 }
 
-func CheckExists(db *gorm.DB) (bool, error) {
+func (g *GormRepository) CheckExists() (bool, error) {
 	tables := []string{
 		"db_forms",
 		"db_question_types",
@@ -25,7 +21,7 @@ func CheckExists(db *gorm.DB) (bool, error) {
 		"db_answers",
 		"db_possible_answers",
 		"db_question_possible_answers"}
-	rows, err := db.Table("sqlite_master").
+	rows, err := g.db.Table("sqlite_master").
 		Where("type = ?", "table").
 		Where("name IN ? ", tables).
 		Select("name").

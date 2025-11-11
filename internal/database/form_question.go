@@ -4,7 +4,6 @@ import (
 	"tusur-forms/internal/domain"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type dbFormsQuestion struct {
@@ -15,7 +14,7 @@ type dbFormsQuestion struct {
 	Question   dbQuestion `gorm:"foreignKey:QuestionID;references:ID"`
 }
 
-func CreateFormsQuestion(f *domain.Form, q *domain.Question, db *gorm.DB) error {
+func (g *GormRepository) CreateFormsQuestion(f *domain.Form, q *domain.Question) error {
 	dbQ := dbFormsQuestion{
 		ID:         uuid.NewString(),
 		FormID:     f.ID,
@@ -24,9 +23,9 @@ func CreateFormsQuestion(f *domain.Form, q *domain.Question, db *gorm.DB) error 
 		Question:   dbQuestion{},
 	}
 
-	err := db.Create(&dbQ).Error
+	err := g.db.Create(&dbQ).Error
 	if err != nil {
 		return err
 	}
-	return db.Save(&dbQ).Error
+	return g.db.Save(&dbQ).Error
 }

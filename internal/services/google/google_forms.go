@@ -1,4 +1,4 @@
-package services
+package google
 
 import (
 	"context"
@@ -67,7 +67,7 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 }
 
 func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
-	externalID := formID
+	externalID := formID //TODO написать получение id из БД
 	response, err := g.googleClient.Forms.Get(externalID).Do()
 	if err != nil {
 		return domain.Form{}, err

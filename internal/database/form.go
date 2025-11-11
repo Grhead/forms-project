@@ -3,8 +3,6 @@ package database
 import (
 	"time"
 	"tusur-forms/internal/domain"
-
-	"gorm.io/gorm"
 )
 
 type dbForm struct {
@@ -15,16 +13,18 @@ type dbForm struct {
 	CreatedAt     time.Time
 }
 
-func CreateForm(f *domain.Form, db *gorm.DB) error {
+func (g *GormRepository) CreateForm(f *domain.Form) error {
 	dbF := dbForm{
-		ID:         f.ID,
-		ExternalID: f.ExternalID,
-		CreatedAt:  f.CreatedAt,
+		ID:            f.ID,
+		ExternalID:    f.ExternalID,
+		CreatedAt:     f.CreatedAt,
+		Title:         f.Title,
+		DocumentTitle: f.DocumentTitle,
 	}
 
-	err := db.Create(&dbF).Error
+	err := g.db.Create(&dbF).Error
 	if err != nil {
 		return err
 	}
-	return db.Save(&dbF).Error
+	return g.db.Save(&dbF).Error
 }
