@@ -1,7 +1,6 @@
 package database
 
 import (
-	"log"
 	"tusur-forms/internal/domain"
 )
 
