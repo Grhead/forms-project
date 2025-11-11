@@ -5,3 +5,4 @@ configs/token.json
 
 vendor/
 local/
+*.exe
