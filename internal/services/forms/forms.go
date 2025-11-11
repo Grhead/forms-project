@@ -24,19 +24,14 @@ type FormService interface {
 }
 
 type GoogleForms struct {
-	OauthCfg *oauth2.Config
+	TokenSource oauth2.TokenSource
 }
 type googleFormsAdapter struct {
 	googleClient *forms.Service
 }
 
-func (g *GoogleForms) NewService(ctx context.Context, filename string) (FormService, error) {
-	token, err := readToken(filename)
-	if err != nil {
-		return nil, err
-	}
-	TokenSource := g.OauthCfg.TokenSource(ctx, token)
-	svc, err := forms.NewService(ctx, option.WithTokenSource(TokenSource))
+func (g *GoogleForms) NewService(ctx context.Context) (FormService, error) {
+	svc, err := forms.NewService(ctx, option.WithTokenSource(g.TokenSource))
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +92,7 @@ func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
 				}
 				answers = append(answers, pAnswer)
 			}
-		tempQuestion.PossibleAnswers = answers;
+			tempQuestion.PossibleAnswers = answers
 		}
 		questions = append(questions, &tempQuestion)
 
@@ -118,13 +113,12 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 	var requests = make([]*forms.Request, 0, len(formItems))
 	for _, question := range questions {
 		tempItem := &forms.Item{
-			Description: question.Description,
-			ItemId:      uuid.NewString(),
-			Title:       question.Title,
+			Description:  question.Description,
+			Title:        question.Title,
+			QuestionItem: &forms.QuestionItem{},
 		}
 		googleQuestion := forms.Question{
-			QuestionId: uuid.NewString(),
-			Required:   question.IsRequired,
+			Required: question.IsRequired,
 		}
 
 		switch question.Type.Title {
@@ -149,9 +143,9 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 				Options: opts,
 			}
 
-			tempItem.QuestionItem.Question = &googleQuestion
-			formItems = append(formItems, tempItem)
 		}
+		tempItem.QuestionItem.Question = &googleQuestion
+		formItems = append(formItems, tempItem)
 	}
 	for i, item := range formItems {
 		requests = append(requests, &forms.Request{
@@ -164,14 +158,14 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 			},
 		})
 	}
-	response, err := g.googleClient.Forms.BatchUpdate(
+	_, err := g.googleClient.Forms.BatchUpdate(
 		form.ExternalID,
 		&forms.BatchUpdateFormRequest{Requests: requests}).
 		Do()
 	if err != nil {
 		return domain.Form{}, err
 	}
-	result, err := g.GetForm(response.Form.FormId)
+	result, err := g.GetForm(form.ExternalID)
 	if err != nil {
 		return domain.Form{}, err
 	}

@@ -20,7 +20,7 @@ func TestGoogleForms_NewService(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// TODO: construct the receiver type.
 			var g GoogleForms
-			got, gotErr := g.NewService(context.Background(), tt.filename)
+			got, gotErr := g.NewService(context.Background())
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("NewService() failed: %v", gotErr)

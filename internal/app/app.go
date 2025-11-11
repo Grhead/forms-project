@@ -2,13 +2,18 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
-	"tusur-forms/internal/services/forms"
+	"tusur-forms/internal/domain"
+	services "tusur-forms/internal/services/forms"
+
+	"github.com/google/uuid"
 )
 
 func Run() error {
+	const filename = "C:\\Users\\Egor Mishchuk\\GolandProjects\\forms-project\\configs\\token.json"
 	ctx := context.Background()
 
 	cfgProvider := &config.EnvConfigProvider{}
@@ -21,11 +26,18 @@ func Run() error {
 		return err
 	}
 	oauthConfig := config.NewOAuth2Config(formCfg)
-	googleProvider := services.GoogleForms{
-		OauthCfg: oauthConfig,
-	}
-	service, err := googleProvider.NewService(ctx, "token.json")
+	tokenConfig, err := config.ReadToken(filename)
+	tokenSource := oauthConfig.TokenSource(ctx, tokenConfig)
 	if err != nil {
+		log.Fatal("After token source")
+		return err
+	}
+	googleProvider := services.GoogleForms{
+		TokenSource: tokenSource,
+	}
+	service, err := googleProvider.NewService(ctx)
+	if err != nil {
+		log.Fatal("After services")
 		return err
 	}
 	dbProvider := &config.DBSQLiteProvider{}
@@ -46,6 +58,34 @@ func Run() error {
 		}
 		log.Println("Successfully migrated database")
 	}
+
+	form, err := service.NewForm("Testing на паре", "Testing")
+	if err != nil {
+		return err
+	}
+	fmt.Println("Form created")
+	form, err = service.GetForm(form.ExternalID)
+	if err != nil {
+		return err
+	}
+	fmt.Println(form)
+	quest := domain.Question{
+		ID:          uuid.NewString(),
+		Title:       "Simple Question",
+		Description: "Give me answers",
+		Type: domain.QuestionType{
+			ID:    uuid.NewString(),
+			Title: "RADIO",
+		},
+		IsRequired:      true,
+		PossibleAnswers: []domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
+	}
+	_, err = service.SetQuestions(form, []*domain.Question{&quest})
+	if err != nil {
+		return err
+	}
+
+	// service.GetForm()
 
 	//a := &domain.Answer{
 	//	ID:          "1",
