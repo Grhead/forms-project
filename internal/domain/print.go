@@ -2,7 +2,6 @@ package domain
 
 import (
 	"fmt"
-	"log"
 )
 
 type IOutput interface {
@@ -14,7 +13,8 @@ func (f *Form) Print() string {
 	for _, item := range f.Questions {
 		questions = append(questions, item.Print())
 	}
-	var result = fmt.Sprintf("ID %s ExternalID %s Title %s DocumentTitle %s CreatedAt %s Questions %s", f.ID, f.ExternalID, f.Title, f.DocumentTitle, f.CreatedAt, questions)
+	var result = fmt.Sprintf("ID: %s ExternalID: %s Title: %s DocumentTitle: %s CreatedAt: %s Questions: %s",
+		f.ID, f.ExternalID, f.Title, f.DocumentTitle, f.CreatedAt, questions)
 	return result
 }
 func (q *Question) Print() string {
@@ -26,7 +26,8 @@ func (q *Question) Print() string {
 	for _, item := range q.PossibleAnswers {
 		possibleAnswers = append(possibleAnswers, item.Print())
 	}
-	var result = fmt.Sprintf("ID: %s Title: %s Description %s Type %s IsRequired %t Answers %v PossibleAnswers %s", q.ID, q.Title, q.Description, q.Type.Print(), q.IsRequired, answers, possibleAnswers)
+	var result = fmt.Sprintf("ID: %s Title: %s Description: %s Type: %s IsRequired: %t Answers: %v PossibleAnswers: %v",
+		q.ID, q.Title, q.Description, q.Type.Print(), q.IsRequired, answers, possibleAnswers)
 	return result
 }
 func (p *PossibleAnswer) Print() string {
@@ -34,10 +35,12 @@ func (p *PossibleAnswer) Print() string {
 	return result
 }
 func (a *Answer) Print() string {
-	var result = fmt.Sprintf("ID: %s SubmittedAt %s Content %s Form %s Question %s", a.ID, a.SubmittedAt, a.Content, a.Form.Print(), a.Question.Print())
+	var result = fmt.Sprintf("ID: %s SubmittedAt: %s Content: %s",
+		a.ID, a.SubmittedAt, a.Content)
 	return result
 }
 func (t *QuestionType) Print() string {
-	var result = fmt.Sprintf("ID: %s Title %s", t.ID, t.Title)
+	var result = fmt.Sprintf("ID: %s Title: %s",
+		t.ID, t.Title)
 	return result
 }

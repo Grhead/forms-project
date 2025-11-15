@@ -29,8 +29,11 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, que
 		if err != nil {
 			return domain.Form{}, err
 		}
-		s.repository.CreateQuestion(questions[0][0])
-		s.repository.CreateFormsQuestion(&d, questions[0][0])
+		for i := range questions[0] {
+			s.repository.CreateQuestion(questions[0][i])
+			s.repository.CreateFormsQuestion(&d, questions[0][i])
+		}
+
 		return d, nil
 	}
 	return d, nil

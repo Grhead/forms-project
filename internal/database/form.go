@@ -89,7 +89,7 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 				Title: domain.QuestionTypeTitles(q.QuestionType.Title),
 			},
 			IsRequired:      q.IsRequired,
-			Answers:         []*domain.Answer{},
+			Answers:         []*domain.Answer{}, //TODO add getting
 			PossibleAnswers: domainPossibleAnswers,
 		})
 	}
