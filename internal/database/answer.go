@@ -33,8 +33,14 @@ func (g *GormRepository) CreateAnswer(a *domain.Answer) error {
 }
 
 func (g *GormRepository) getFormsQuestionID(a *domain.Answer) (dbFormsQuestion, error) {
-	var fq dbFormsQuestion
-	err := g.db.Where("form_id = ? AND question_id = ?", a.FormID, a.QuestionID).First(&fq).Error
-	return fq, err
-
+	// var fq dbFormsQuestion
+	// err := g.db.Where("form_id = ? AND question_id = ?", a.FormID, a.QuestionID).First(&fq).Error
+	// return fq, err
+	return dbFormsQuestion{
+		ID:         "",
+		FormID:     "",
+		Form:       dbForm{},
+		QuestionID: "",
+		Question:   dbQuestion{},
+	}, nil
 }

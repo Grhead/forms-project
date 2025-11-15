@@ -6,7 +6,8 @@ type Question struct {
 	Description     string
 	Type            QuestionType
 	IsRequired      bool
-	PossibleAnswers []PossibleAnswer
+	Answers         []*Answer
+	PossibleAnswers []*PossibleAnswer
 }
 
 type QuestionType struct {

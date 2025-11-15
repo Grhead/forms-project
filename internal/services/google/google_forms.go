@@ -2,7 +2,9 @@ package google
 
 import (
 	"context"
+	"log"
 	"time"
+	"tusur-forms/internal/database"
 	"tusur-forms/internal/domain"
 
 	"github.com/google/uuid"
@@ -28,15 +30,17 @@ type GoogleForms struct {
 }
 type googleFormsAdapter struct {
 	googleClient *forms.Service
+	repository   database.FormRepository
 }
 
-func (g *GoogleForms) NewService(ctx context.Context) (FormService, error) {
+func (g *GoogleForms) NewService(ctx context.Context, r database.FormRepository) (FormService, error) {
 	svc, err := forms.NewService(ctx, option.WithTokenSource(g.TokenSource))
 	if err != nil {
 		return nil, err
 	}
 	adapter := &googleFormsAdapter{
 		googleClient: svc,
+		repository:   r,
 	}
 
 	return adapter, nil
@@ -61,15 +65,20 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 		DocumentTitle: result.Info.DocumentTitle,
 		CreatedAt:     time.Now(),
 		Questions:     nil,
-		Answers:       nil,
 	}
 	return f, nil
 }
 
 func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
-	externalID := formID //TODO написать получение id из БД
+	log.Println("GetForm berfore external")
+	externalID, err := g.repository.GetFormExternalID(formID)
+	if err != nil {
+		log.Println("externalID")
+		return domain.Form{}, err
+	}
 	response, err := g.googleClient.Forms.Get(externalID).Do()
 	if err != nil {
+		log.Println("response")
 		return domain.Form{}, err
 	}
 	questions := make([]*domain.Question, 0, len(response.Items))
@@ -84,13 +93,13 @@ func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
 		}
 		if i.QuestionItem.Question.ChoiceQuestion.Type == string(domain.TypeCheckbox) ||
 			i.QuestionItem.Question.ChoiceQuestion.Type == string(domain.TypeRadio) {
-			answers := make([]domain.PossibleAnswer, 0, len(response.Items))
+			answers := make([]*domain.PossibleAnswer, 0, len(response.Items))
 
 			for _, q := range i.QuestionItem.Question.ChoiceQuestion.Options {
 				pAnswer := domain.PossibleAnswer{
 					Content: q.Value,
 				}
-				answers = append(answers, pAnswer)
+				answers = append(answers, &pAnswer)
 			}
 			tempQuestion.PossibleAnswers = answers
 		}
@@ -104,7 +113,6 @@ func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
 		DocumentTitle: response.Info.DocumentTitle,
 		CreatedAt:     time.Time{},
 		Questions:     questions,
-		Answers:       nil,
 	}
 	return f, nil
 }
@@ -165,7 +173,7 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 	if err != nil {
 		return domain.Form{}, err
 	}
-	result, err := g.GetForm(form.ExternalID)
+	result, err := g.GetForm(form.ID)
 	if err != nil {
 		return domain.Form{}, err
 	}

@@ -9,5 +9,4 @@ type Form struct {
 	DocumentTitle string
 	CreatedAt     time.Time
 	Questions     []*Question
-	Answers       []*Answer
 }

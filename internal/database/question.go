@@ -33,12 +33,12 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) error {
 	}
 	if q.Type.Title == domain.TypeCheckbox || q.Type.Title == domain.TypeRadio {
 		for _, item := range q.PossibleAnswers {
-			paID, err := g.getPossibleAnswer(&item)
+			paID, err := g.getPossibleAnswer(item)
 			if err != nil {
 					return err
 			}
 			if paID == nil {
-				_, err = g.CreatePossibleAnswer(&item, q)
+				_, err = g.CreatePossibleAnswer(item, q)
 				if err != nil {
 					return err
 				}

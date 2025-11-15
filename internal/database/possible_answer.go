@@ -53,7 +53,7 @@ func (g *GormRepository) createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *d
 
 func (g *GormRepository) getPossibleAnswer(a *domain.PossibleAnswer) (*dbPossibleAnswer, error) {
 	var fq []*dbPossibleAnswer
-	err := g.db.Where("content = ?", a.Content).Limit(3).Find(&fq)
+	err := g.db.Where("content = ?", a.Content).Find(&fq)
 	if err != nil {
 		return nil, err.Error
 	} else if len(fq) == 0 {

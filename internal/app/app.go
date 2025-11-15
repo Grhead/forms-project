@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
@@ -36,11 +37,6 @@ func Run() error {
 	googleProvider := google.GoogleForms{
 		TokenSource: tokenSource,
 	}
-	service, err := googleProvider.NewService(ctx)
-	if err != nil {
-		log.Fatal("After services")
-		return err
-	}
 	dbProvider := &config.DBSQLiteProvider{}
 	db, err := dbProvider.Connect(dbCfg)
 	if err != nil {
@@ -59,8 +55,13 @@ func Run() error {
 		}
 		log.Println("Successfully migrated database")
 	}
+	// gormRepo.GetForm("1ELRegbHunHnqEgadl5-0l5N5VZ0HVetQAkk8CGMdymQ")
+	service, err := googleProvider.NewService(ctx, gormRepo)
+	if err != nil {
+		return err
+	}
 	newOrchesctrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
-	
+
 	quest := domain.Question{
 		ID:          uuid.NewString(),
 		Title:       "Simple Question",
@@ -70,18 +71,17 @@ func Run() error {
 			Title: "RADIO",
 		},
 		IsRequired:      true,
-		PossibleAnswers: []domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
+		PossibleAnswers: []*domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
 	}
 	_, err = newOrchesctrator.CheckoutForm("Testing на паре", "Testing", []*domain.Question{&quest})
 	if err != nil {
 		return err
 	}
-
-	/* _, err = service.SetQuestions(form, )
+	f, err := gormRepo.GetForm("933b5f05-610d-49e0-b7aa-f90ecf70d4af")
 	if err != nil {
 		return err
-	} */
-
+	}
+	fmt.Println(f.Print())
 	// service.GetForm()
 
 	//a := &domain.Answer{

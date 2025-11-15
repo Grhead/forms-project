@@ -20,6 +20,8 @@ type FormRepository interface {
 	CreateAnswer(a *domain.Answer) error
 
 	getFormsQuestionID(a *domain.Answer) (dbFormsQuestion, error)
+	GetForm(internalID string) (*domain.Form, error)
+	GetFormExternalID(internalID string) (string, error)
 
 	Migrate() error
 	CheckExists() (bool, error)
