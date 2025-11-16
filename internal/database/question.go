@@ -28,7 +28,10 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) error {
 		return err
 	}
 	if !exists {
-		g.createQuestionType(&q.Type)
+		err = g.createQuestionType(&q.Type)
+		if err != nil {
+			return err
+		}
 	}
 	dbQ := dbQuestion{
 		ID:          q.ID,

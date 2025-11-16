@@ -44,7 +44,7 @@ func (g *GormRepository) GetFormExternalID(internalID string) (string, error) {
 
 func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 	var dbForm []*dbForm
-	var dbFormQiestions []*dbFormsQuestion
+	var dbFormQuestions []*dbFormsQuestion
 	var domainQuestions []*domain.Question
 
 	err := g.db.Where("id = ?", internalID).Limit(1).Find(&dbForm).Error
@@ -53,22 +53,22 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 	} else if len(dbForm) == 0 {
 		return nil, nil
 	}
-	err = g.db.Where("form_id = ?", internalID).Preload("Question.QuestionType").Find(&dbFormQiestions).Error
+	err = g.db.Where("form_id = ?", internalID).Preload("Question.QuestionType").Find(&dbFormQuestions).Error
 
 	if err != nil {
 		return nil, err
-	} else if len(dbFormQiestions) == 0 {
+	} else if len(dbFormQuestions) == 0 {
 		return nil, nil
 	}
-	for i := range dbFormQiestions {
+	for i := range dbFormQuestions {
 		var dbQuestionPossibleAnswers []*dbQuestionPossibleAnswer
 		var domainPossibleAnswers []*domain.PossibleAnswer
 
-		q := dbFormQiestions[i].Question
+		q := dbFormQuestions[i].Question
 		err = g.db.Where("question_id = ?", q.ID).Preload("PossibleAnswer").Find(&dbQuestionPossibleAnswers).Error
 		if err != nil {
 			return nil, err
-		} else if len(dbFormQiestions) == 0 {
+		} else if len(dbFormQuestions) == 0 {
 			return nil, nil
 		}
 		log.Println(dbQuestionPossibleAnswers)
@@ -93,7 +93,7 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 			PossibleAnswers: domainPossibleAnswers,
 		})
 	}
-	result_domain := domain.Form{
+	resultDomain := domain.Form{
 		ID:            internalID,
 		ExternalID:    dbForm[0].ExternalID,
 		Title:         dbForm[0].Title,
@@ -101,5 +101,5 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 		CreatedAt:     dbForm[0].CreatedAt,
 		Questions:     domainQuestions,
 	}
-	return &result_domain, nil
+	return &resultDomain, nil
 }

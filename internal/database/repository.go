@@ -14,7 +14,7 @@ type FormRepository interface {
 	CreateForm(f *domain.Form) error
 	CreateQuestion(q *domain.Question) error
 	createQuestionType(qt *domain.QuestionType) error
-	CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question) (*dbPossibleAnswer, error)
+	CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question) (*domain.PossibleAnswer, error)
 	createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question) error
 	CreateFormsQuestion(f *domain.Form, q *domain.Question) error
 	CreateAnswer(a *domain.Answer) error

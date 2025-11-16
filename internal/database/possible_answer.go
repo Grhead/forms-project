@@ -19,7 +19,7 @@ type dbQuestionPossibleAnswer struct {
 	PossibleAnswer   dbPossibleAnswer `gorm:"foreignKey:PossibleAnswerID;references:ID"`
 }
 
-func (g *GormRepository) CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question) (*dbPossibleAnswer, error) {
+func (g *GormRepository) CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question) (*domain.PossibleAnswer, error) {
 	dbPa := dbPossibleAnswer{
 		ID:      uuid.NewString(),
 		Content: pa.Content,
@@ -32,7 +32,7 @@ func (g *GormRepository) CreatePossibleAnswer(pa *domain.PossibleAnswer, q *doma
 	if err != nil {
 		return nil, err
 	}
-	return &dbPa, g.db.Save(&dbPa).Error
+	return &domain.PossibleAnswer{Content: dbPa.Content}, g.db.Save(&dbPa).Error
 }
 
 func (g *GormRepository) createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question) error {
@@ -59,5 +59,5 @@ func (g *GormRepository) getPossibleAnswer(a *domain.PossibleAnswer) (*dbPossibl
 	} else if len(fq) == 0 {
 		return nil, nil
 	}
-	return	fq[0], nil
+	return fq[0], nil
 }

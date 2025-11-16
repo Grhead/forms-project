@@ -23,15 +23,24 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, que
 	if err != nil {
 		return domain.Form{}, err
 	}
-	s.repository.CreateForm(&d)
+	err = s.repository.CreateForm(&d)
+	if err != nil {
+		return domain.Form{}, err
+	}
 	if len(questions) != 0 {
-		d, err := s.creator.SetQuestions(d, questions[0])
+		d, err = s.creator.SetQuestions(d, questions[0])
 		if err != nil {
 			return domain.Form{}, err
 		}
 		for i := range questions[0] {
-			s.repository.CreateQuestion(questions[0][i])
-			s.repository.CreateFormsQuestion(&d, questions[0][i])
+			err = s.repository.CreateQuestion(questions[0][i])
+			if err != nil {
+				return domain.Form{}, err
+			}
+			err = s.repository.CreateFormsQuestion(&d, questions[0][i])
+			if err != nil {
+				return domain.Form{}, err
+			}
 		}
 
 		return d, nil

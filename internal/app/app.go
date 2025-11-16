@@ -60,7 +60,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	newOrchesctrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
+	newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
 
 	quest := domain.Question{
 		ID:          uuid.NewString(),
@@ -73,7 +73,7 @@ func Run() error {
 		IsRequired:      true,
 		PossibleAnswers: []*domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
 	}
-	_, err = newOrchesctrator.CheckoutForm("Testing на паре", "Testing", []*domain.Question{&quest})
+	_, err = newOrchestrator.CheckoutForm("Testing на паре", "Testing", []*domain.Question{&quest})
 	if err != nil {
 		return err
 	}
