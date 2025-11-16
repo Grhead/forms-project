@@ -29,7 +29,7 @@ func (g *GormRepository) CreateAnswer(a *domain.Answer) error {
 	if err != nil {
 		return err
 	}
-	return g.db.Save(&dbQ).Error
+	return nil
 }
 
 func (g *GormRepository) getFormsQuestionID(a *domain.Answer) (dbFormsQuestion, error) {

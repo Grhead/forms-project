@@ -1,16 +1,20 @@
 package database
 
 import (
+	"errors"
 	"tusur-forms/internal/domain"
+
+	"gorm.io/gorm"
 )
 
 type dbQuestion struct {
-	ID           string `gorm:"primaryKey"`
-	Title        string
-	Description  string
-	TypeID       string
-	QuestionType dbQuestionType `gorm:"foreignKey:TypeID;references:ID"`
-	IsRequired   bool
+	ID                      string `gorm:"primaryKey"`
+	Title                   string
+	Description             string
+	TypeID                  string
+	QuestionType            dbQuestionType `gorm:"foreignKey:TypeID;references:ID"`
+	IsRequired              bool
+	QuestionPossibleAnswers []dbQuestionPossibleAnswer `gorm:"foreignKey:QuestionID;references:ID"`
 }
 
 type dbQuestionType struct {
@@ -19,15 +23,11 @@ type dbQuestionType struct {
 }
 
 func (g *GormRepository) CreateQuestion(q *domain.Question) error {
-	qts, err := g.getQuestionType(q.Type.ID)
+	dbQt, err := g.getQuestionTypeByID(q.Type.ID)
 	if err != nil {
 		return err
 	}
-	exists, err := g.checkQuestionType(qts)
-	if err != nil {
-		return err
-	}
-	if !exists {
+	if dbQt == nil {
 		err = g.createQuestionType(&q.Type)
 		if err != nil {
 			return err
@@ -37,7 +37,7 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) error {
 		ID:          q.ID,
 		Title:       q.Title,
 		Description: q.Description,
-		IsRequired:  false,
+		IsRequired:  q.IsRequired,
 		TypeID:      q.Type.ID,
 	}
 
@@ -60,7 +60,7 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) error {
 		}
 	}
 
-	return g.db.Save(&dbQ).Error
+	return nil
 }
 
 func (g *GormRepository) createQuestionType(qt *domain.QuestionType) error {
@@ -73,36 +73,17 @@ func (g *GormRepository) createQuestionType(qt *domain.QuestionType) error {
 	if err != nil {
 		return err
 	}
-	return g.db.Save(&dbQt).Error
+	return nil
 }
 
-func (g *GormRepository) getQuestionType(qtID string) ([]*domain.QuestionType, error) {
-	var qts []*dbQuestionType
-	err := g.db.Where("id = ?", qtID).Find(&qts)
+func (g *GormRepository) getQuestionTypeByID(qtID string) (*dbQuestionType, error) {
+	var dbQt dbQuestionType
+	err := g.db.Where("id = ?", qtID).First(&dbQt).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	if err != nil {
-		return nil, err.Error
+		return nil, err
 	}
-	var result []*domain.QuestionType
-	for i := range qts {
-		result = append(result, &domain.QuestionType{
-			ID:    qts[i].ID,
-			Title: domain.QuestionTypeTitles(qts[i].Title),
-		})
-	}
-	return result, nil
-}
-
-func (g *GormRepository) checkQuestionType(qts []*domain.QuestionType) (bool, error) {
-	var qtss []string
-	var types []*dbQuestionType
-	for _, item := range qts {
-		qtss = append(qtss, item.ID)
-	}
-	err := g.db.
-		Where("id IN ? ", qtss).
-		Find(&types)
-	if err != nil {
-		return false, err.Error
-	}
-	return true, nil
+	return &dbQt, nil
 }

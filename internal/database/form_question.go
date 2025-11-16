@@ -27,5 +27,5 @@ func (g *GormRepository) CreateFormsQuestion(f *domain.Form, q *domain.Question)
 	if err != nil {
 		return err
 	}
-	return g.db.Save(&dbQ).Error
+	return nil
 }
