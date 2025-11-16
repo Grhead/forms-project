@@ -14,7 +14,6 @@ import (
 )
 
 func Run() error {
-	const filename = "C:\\Users\\Egor Mishchuk\\GolandProjects\\forms-project\\configs\\token.json"
 	ctx := context.Background()
 
 	cfgProvider := &config.EnvConfigProvider{}
@@ -27,8 +26,7 @@ func Run() error {
 		return err
 	}
 	oauthConfig := config.NewOAuth2Config(formCfg)
-	log.Printf("New OAuth2 Config generated")
-	tokenConfig, err := config.ReadToken(filename)
+	tokenConfig, err := config.ReadToken(formCfg.TokenPath)
 	if err != nil {
 		return err
 	}
@@ -55,7 +53,7 @@ func Run() error {
 		}
 		log.Println("Successfully migrated database")
 	}
-	// gormRepo.GetForm("1ELRegbHunHnqEgadl5-0l5N5VZ0HVetQAkk8CGMdymQ")
+
 	service, err := googleProvider.NewService(ctx, gormRepo)
 	if err != nil {
 		return err
@@ -73,11 +71,11 @@ func Run() error {
 		IsRequired:      true,
 		PossibleAnswers: []*domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
 	}
-	_, err = newOrchestrator.CheckoutForm("Testing на паре", "Testing", []*domain.Question{&quest})
+	_, err = newOrchestrator.CheckoutForm("Testing уже не на паре", "Testing", []*domain.Question{&quest})
 	if err != nil {
 		return err
 	}
-	f, err := gormRepo.GetForm("933b5f05-610d-49e0-b7aa-f90ecf70d4af")
+	f, err := gormRepo.GetForm("8a227a28-32f1-49f8-8867-0f371ca3743e")
 	if err != nil {
 		return err
 	}

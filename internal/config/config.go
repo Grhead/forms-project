@@ -15,6 +15,7 @@ type FormConfig struct {
 	clientID     string
 	clientSecret string
 	redirectURL  string
+	TokenPath    string
 }
 type DBConfig struct {
 	fileName string
@@ -39,6 +40,7 @@ func (e *EnvConfigProvider) LoadFormConfig() (*FormConfig, error) {
 		clientID:     os.Getenv("CLIENT_ID"),
 		clientSecret: os.Getenv("CLIENT_SECRET"),
 		redirectURL:  os.Getenv("REDIRECT_URL"),
+		TokenPath:    os.Getenv("TOKEN_PATH"),
 	}
 	return cfg, nil
 }

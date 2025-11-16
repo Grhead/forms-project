@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"log"
 	"tusur-forms/internal/domain"
 
 	"gorm.io/gorm"
@@ -14,7 +15,7 @@ type dbQuestion struct {
 	TypeID                  string
 	QuestionType            dbQuestionType `gorm:"foreignKey:TypeID;references:ID"`
 	IsRequired              bool
-	QuestionPossibleAnswers []dbQuestionPossibleAnswer `gorm:"foreignKey:QuestionID;references:ID"`
+	QuestionPossibleAnswers []*dbQuestionPossibleAnswer `gorm:"foreignKey:QuestionID;references:ID"`
 }
 
 type dbQuestionType struct {
@@ -23,7 +24,8 @@ type dbQuestionType struct {
 }
 
 func (g *GormRepository) CreateQuestion(q *domain.Question) error {
-	dbQt, err := g.getQuestionTypeByID(q.Type.ID)
+	log.Println(q.Type.ID)
+	dbQt, err := g.getQuestionTypeByTitle(string(q.Type.Title))
 	if err != nil {
 		return err
 	}
@@ -76,9 +78,9 @@ func (g *GormRepository) createQuestionType(qt *domain.QuestionType) error {
 	return nil
 }
 
-func (g *GormRepository) getQuestionTypeByID(qtID string) (*dbQuestionType, error) {
+func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType, error) {
 	var dbQt dbQuestionType
-	err := g.db.Where("id = ?", qtID).First(&dbQt).Error
+	err := g.db.Where("title = ?", qtTitle).First(&dbQt).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

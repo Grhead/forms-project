@@ -9,11 +9,12 @@ import (
 )
 
 type dbForm struct {
-	ID            string `gorm:"primaryKey"`
-	Title         string
-	DocumentTitle string
-	ExternalID    string
-	CreatedAt     time.Time
+	ID             string `gorm:"primaryKey"`
+	Title          string
+	DocumentTitle  string
+	ExternalID     string
+	CreatedAt      time.Time
+	FormsQuestions []*dbFormsQuestion `gorm:"foreignKey:FormID;references:ID"`
 }
 
 func (g *GormRepository) CreateForm(f *domain.Form) error {
@@ -45,25 +46,26 @@ func (g *GormRepository) GetFormExternalID(internalID string) (string, error) {
 }
 
 func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
-	var dbForm dbForm
-	var dbFormQuestions []*dbFormsQuestion
+	var form dbForm
+	//var dbFormQuestions []*dbFormsQuestion
 	var domainQuestions []*domain.Question
 
-	err := g.db.Where("id = ?", internalID).First(&dbForm).Error
+	err := g.db.Preload("FormsQuestions.Question.QuestionType").
+		Preload("FormsQuestions.Question.QuestionPossibleAnswers.PossibleAnswer").
+		Where("id = ?", internalID).
+		First(&form).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	err = g.db.Where("form_id = ?", internalID).
-		Preload("Question.QuestionType").
-		Preload("Question.QuestionPossibleAnswers.PossibleAnswer").
-		Find(&dbFormQuestions).Error
-	if err != nil {
-		return nil, err
-	}
-	for _, item := range dbFormQuestions {
+	//err = g.db.Where("form_id = ?", internalID).
+	//	Find(&dbFormQuestions).Error
+	//if err != nil {
+	//	return nil, err
+	//}
+	for _, item := range form.FormsQuestions {
 		q := item.Question
 		domainPossibleAnswers := make([]*domain.PossibleAnswer, 0, len(q.QuestionPossibleAnswers))
 
@@ -88,10 +90,10 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 	}
 	resultDomain := domain.Form{
 		ID:            internalID,
-		ExternalID:    dbForm.ExternalID,
-		Title:         dbForm.Title,
-		DocumentTitle: dbForm.DocumentTitle,
-		CreatedAt:     dbForm.CreatedAt,
+		ExternalID:    form.ExternalID,
+		Title:         form.Title,
+		DocumentTitle: form.DocumentTitle,
+		CreatedAt:     form.CreatedAt,
 		Questions:     domainQuestions,
 	}
 	return &resultDomain, nil

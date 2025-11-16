@@ -54,13 +54,13 @@ func (g *GormRepository) createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *d
 }
 
 func (g *GormRepository) getPossibleAnswer(a *domain.PossibleAnswer) (*dbPossibleAnswer, error) {
-	var fq []*dbPossibleAnswer
-	err := g.db.Where("content = ?", a.Content).Find(&fq).Error
+	var fq dbPossibleAnswer
+	err := g.db.Where("content = ?", a.Content).First(&fq).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, err
 	}
-	return fq[0], nil
+	return &fq, nil
 }

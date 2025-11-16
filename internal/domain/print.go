@@ -10,8 +10,10 @@ type IOutput interface {
 
 func (f *Form) Print() string {
 	var questions []string
-	for _, item := range f.Questions {
-		questions = append(questions, item.Print())
+	if len(f.Questions) != 0 {
+		for _, item := range f.Questions {
+			questions = append(questions, item.Print())
+		}
 	}
 	var result = fmt.Sprintf("ID: %s ExternalID: %s Title: %s DocumentTitle: %s CreatedAt: %s Questions: %s",
 		f.ID, f.ExternalID, f.Title, f.DocumentTitle, f.CreatedAt, questions)
