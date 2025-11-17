@@ -18,32 +18,31 @@ func NewFormsOrchestrator(c google.FormService, r database.FormRepository) *Form
 	}
 }
 
-func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, questions ...[]*domain.Question) (domain.Form, error) {
+func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, questions ...[]*domain.Question) (*domain.Form, error) {
 	d, err := s.creator.NewForm(title, documentTitle)
 	if err != nil {
-		return domain.Form{}, err
+		return nil, err
 	}
 	err = s.repository.CreateForm(&d)
 	if err != nil {
-		return domain.Form{}, err
+		return nil, err
 	}
 	if len(questions) != 0 {
 		d, err = s.creator.SetQuestions(d, questions[0])
 		if err != nil {
-			return domain.Form{}, err
+			return nil, err
 		}
 		for i := range questions[0] {
-			err = s.repository.CreateQuestion(questions[0][i])
+			qID, err := s.repository.CreateQuestion(questions[0][i])
 			if err != nil {
-				return domain.Form{}, err
+				return nil, err
 			}
-			err = s.repository.CreateFormsQuestion(&d, questions[0][i])
+			err = s.repository.CreateFormsQuestion(&d, qID)
 			if err != nil {
-				return domain.Form{}, err
+				return nil, err
 			}
 		}
-
-		return d, nil
+		return &d, nil
 	}
-	return d, nil
+	return &d, nil
 }

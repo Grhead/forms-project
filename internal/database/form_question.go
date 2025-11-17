@@ -14,12 +14,12 @@ type dbFormsQuestion struct {
 	Question   dbQuestion `gorm:"foreignKey:QuestionID;references:ID"`
 }
 
-func (g *GormRepository) CreateFormsQuestion(f *domain.Form, q *domain.Question) error {
+func (g *GormRepository) CreateFormsQuestion(f *domain.Form, qID string) error {
 	dbQ := dbFormsQuestion{
 		ID:         uuid.NewString(),
 		FormID:     f.ID,
 		Form:       dbForm{},
-		QuestionID: q.ID,
+		QuestionID: qID,
 		Question:   dbQuestion{},
 	}
 

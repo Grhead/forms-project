@@ -60,11 +60,6 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 	if err != nil {
 		return nil, err
 	}
-	//err = g.db.Where("form_id = ?", internalID).
-	//	Find(&dbFormQuestions).Error
-	//if err != nil {
-	//	return nil, err
-	//}
 	for _, item := range form.FormsQuestions {
 		q := item.Question
 		domainPossibleAnswers := make([]*domain.PossibleAnswer, 0, len(q.QuestionPossibleAnswers))
@@ -76,11 +71,9 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 			})
 		}
 		domainQuestions = append(domainQuestions, &domain.Question{
-			ID:          q.ID,
 			Title:       q.Title,
 			Description: q.Description,
 			Type: domain.QuestionType{
-				ID:    q.QuestionType.ID,
 				Title: domain.QuestionTypeTitles(q.QuestionType.Title),
 			},
 			IsRequired:      q.IsRequired,

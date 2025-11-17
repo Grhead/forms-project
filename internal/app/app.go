@@ -9,8 +9,6 @@ import (
 	"tusur-forms/internal/domain"
 	"tusur-forms/internal/services/google"
 	"tusur-forms/internal/services/orchectrators"
-
-	"github.com/google/uuid"
 )
 
 func Run() error {
@@ -31,7 +29,6 @@ func Run() error {
 		return err
 	}
 	tokenSource := oauthConfig.TokenSource(ctx, tokenConfig)
-
 	googleProvider := google.GoogleForms{
 		TokenSource: tokenSource,
 	}
@@ -60,51 +57,77 @@ func Run() error {
 	}
 	newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
 
-	quest := domain.Question{
-		ID:          uuid.NewString(),
-		Title:       "Simple Question",
-		Description: "Give me answers",
+	quest1 := domain.Question{
+		Title:       "Это первый вопрос",
+		Description: "Ответь на любой RADIO",
 		Type: domain.QuestionType{
-			ID:    uuid.NewString(),
-			Title: "RADIO",
+			Title: domain.TypeRadio,
 		},
 		IsRequired:      true,
-		PossibleAnswers: []*domain.PossibleAnswer{{Content: "First answer of universe"}, {Content: "Second answer of Earth"}},
+		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый RADIO"}, {Content: "Второй RADIO"}, {Content: "Третий RADIO"}, {Content: "Четвёртый RADIO"}},
 	}
-	_, err = newOrchestrator.CheckoutForm("Testing уже не на паре", "Testing", []*domain.Question{&quest})
+	quest2 := domain.Question{
+		Title:       "Это второй вопрос",
+		Description: "Это оставь пустым",
+		Type: domain.QuestionType{
+			Title: domain.TypeText,
+		},
+		IsRequired:      true,
+		PossibleAnswers: []*domain.PossibleAnswer{},
+	}
+	quest3 := domain.Question{
+		Title:       "Это третий вопрос",
+		Description: "Ответь на любой RADIO",
+		Type: domain.QuestionType{
+			Title: domain.TypeRadio,
+		},
+		IsRequired:      true,
+		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый-второй RADIO"}, {Content: "Второй-третий RADIO"}, {Content: "Третий-пятый RADIO"}, {Content: "Четвёртый RADIO"}},
+	}
+	quest4 := domain.Question{
+		Title:       "Это четвертый вопрос",
+		Description: "Ответь на любой RADIO",
+		Type: domain.QuestionType{
+			Title: domain.TypeRadio,
+		},
+		IsRequired:      true,
+		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый-второй RADIO"}, {Content: "Не второй RADIO"}, {Content: "Не третий RADIO"}, {Content: "Не четвёртый RADIO"}},
+	}
+	quest5 := domain.Question{
+		Title:       "Это пятый вопрос",
+		Description: "Ответь следующим текстом (просто скопируй): 'Высокая громкость вредит вашему слуху'",
+		Type: domain.QuestionType{
+			Title: domain.TypeCheckbox,
+		},
+		IsRequired:      false,
+		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый CHECK"}, {Content: "Второй CHECK"}, {Content: "Третий CHECK"}, {Content: "Четвёртый CHECK"}},
+	}
+	quest6 := domain.Question{
+		Title:       "Это шестой вопрос",
+		Description: "Оставь пустым, не трогай",
+		Type: domain.QuestionType{
+			Title: domain.TypeText,
+		},
+		IsRequired:      false,
+		PossibleAnswers: []*domain.PossibleAnswer{},
+	}
+	quest7 := domain.Question{
+		Title:       "Это седьмой вопрос",
+		Description: "Отметить более 3 чекбоксов",
+		Type: domain.QuestionType{
+			Title: domain.TypeCheckbox,
+		},
+		IsRequired:      true,
+		PossibleAnswers: []*domain.PossibleAnswer{{Content: "CHECK GANG"}, {Content: "Отметь меня"}, {Content: "И меня отметь"}, {Content: "А меня как хочешь"}},
+	}
+	forma, err := newOrchestrator.CheckoutForm("Testing ради Answers", "Попытка №17", []*domain.Question{&quest1, &quest2, &quest3, &quest4, &quest5, &quest6, &quest7})
 	if err != nil {
 		return err
 	}
-	f, err := gormRepo.GetForm("8a227a28-32f1-49f8-8867-0f371ca3743e")
+	f, err := gormRepo.GetForm(forma.ID)
 	if err != nil {
 		return err
 	}
 	fmt.Println(f.Print())
-	// service.GetForm()
-
-	//a := &domain.Answer{
-	//	ID:          "1",
-	//	SubmittedAt: time.Now(),
-	//	Content:     "Horns",
-	//	FormID:      "1",
-	//	QuestionID:  "1",
-	//}
-	//err = database.CreateAnswer(a, db)
-	//if err != nil {
-	//	return err
-	//}
-	//t := &domain.QuestionType{
-	//	ID:    "1",
-	//	Title: "Первый тип",
-	//}
-	//database.CreateQuestionType(t, db)
-	//q := &domain.Question{
-	//	ID:              "1",
-	//	Title:           "Вопрос №1",
-	//	Type:            *t,
-	//	IsRequired:      true,
-	//	PossibleAnswers: nil,
-	//}
-	//database.CreateQuestion(q, db)
 	return nil
 }

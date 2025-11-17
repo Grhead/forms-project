@@ -12,13 +12,14 @@ type GormRepository struct {
 
 type FormRepository interface {
 	CreateForm(f *domain.Form) error
-	CreateQuestion(q *domain.Question) error
-	createQuestionType(qt *domain.QuestionType) error
-	CreatePossibleAnswer(pa *domain.PossibleAnswer, q *domain.Question) (*domain.PossibleAnswer, error)
-	createQuestionPossibleAnswer(pa *dbPossibleAnswer, q *domain.Question) error
-	CreateFormsQuestion(f *domain.Form, q *domain.Question) error
+	CreateQuestion(q *domain.Question) (string, error)
+	createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error)
+	CreatePossibleAnswer(pa *domain.PossibleAnswer, qID string) (*domain.PossibleAnswer, error)
+	createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
+	CreateFormsQuestion(f *domain.Form, qID string) error
 	CreateAnswer(a *domain.Answer) error
 
+	getQuestionByTitle(qID string) (*dbQuestion, error)
 	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)
 	GetForm(internalID string) (*domain.Form, error)
 	GetFormExternalID(internalID string) (string, error)

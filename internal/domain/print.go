@@ -28,8 +28,8 @@ func (q *Question) Print() string {
 	for _, item := range q.PossibleAnswers {
 		possibleAnswers = append(possibleAnswers, item.Print())
 	}
-	var result = fmt.Sprintf("ID: %s Title: %s Description: %s Type: %s IsRequired: %t Answers: %v PossibleAnswers: %v",
-		q.ID, q.Title, q.Description, q.Type.Print(), q.IsRequired, answers, possibleAnswers)
+	var result = fmt.Sprintf("Title: %s Description: %s Type: %s IsRequired: %t Answers: %v PossibleAnswers: %v",
+		q.Title, q.Description, q.Type.Print(), q.IsRequired, answers, possibleAnswers)
 	return result
 }
 func (p *PossibleAnswer) Print() string {
@@ -42,7 +42,7 @@ func (a *Answer) Print() string {
 	return result
 }
 func (t *QuestionType) Print() string {
-	var result = fmt.Sprintf("ID: %s Title: %s",
-		t.ID, t.Title)
+	var result = fmt.Sprintf("Title: %s",
+		t.Title)
 	return result
 }

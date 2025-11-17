@@ -2,9 +2,9 @@ package database
 
 import (
 	"errors"
-	"log"
 	"tusur-forms/internal/domain"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -23,59 +23,67 @@ type dbQuestionType struct {
 	Title string
 }
 
-func (g *GormRepository) CreateQuestion(q *domain.Question) error {
-	log.Println(q.Type.ID)
+func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
+	var qID string
 	dbQt, err := g.getQuestionTypeByTitle(string(q.Type.Title))
 	if err != nil {
-		return err
+		return "", err
 	}
 	if dbQt == nil {
-		err = g.createQuestionType(&q.Type)
+		dbQt, err = g.createQuestionType(&q.Type)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
-	dbQ := dbQuestion{
-		ID:          q.ID,
-		Title:       q.Title,
-		Description: q.Description,
-		IsRequired:  q.IsRequired,
-		TypeID:      q.Type.ID,
+	dbQ, err := g.getQuestionByTitle(string(q.Type.Title))
+	if err != nil {
+		return "", err
+	}
+	if dbQ == nil {
+		qID = uuid.NewString()
+		dbQ = &dbQuestion{
+			ID:          qID,
+			Title:       q.Title,
+			Description: q.Description,
+			IsRequired:  q.IsRequired,
+			TypeID:      dbQt.ID,
+		}
+		err = g.db.Create(&dbQ).Error
+		if err != nil {
+			return "", err
+		}
+	} else {
+		qID = dbQ.ID
 	}
 
-	err = g.db.Create(&dbQ).Error
-	if err != nil {
-		return err
-	}
 	if q.Type.Title == domain.TypeCheckbox || q.Type.Title == domain.TypeRadio {
 		for _, item := range q.PossibleAnswers {
 			paID, err := g.getPossibleAnswer(item)
 			if err != nil {
-				return err
+				return "", err
 			}
 			if paID == nil {
-				_, err = g.CreatePossibleAnswer(item, q)
+				_, err = g.CreatePossibleAnswer(item, qID)
 				if err != nil {
-					return err
+					return "", err
 				}
 			}
 		}
 	}
 
-	return nil
+	return qID, nil
 }
 
-func (g *GormRepository) createQuestionType(qt *domain.QuestionType) error {
+func (g *GormRepository) createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error) {
 	dbQt := dbQuestionType{
-		ID:    qt.ID,
+		ID:    uuid.NewString(),
 		Title: string(qt.Title),
 	}
-
 	err := g.db.Create(&dbQt).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return &dbQt, nil
 }
 
 func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType, error) {
@@ -88,4 +96,16 @@ func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType
 		return nil, err
 	}
 	return &dbQt, nil
+}
+
+func (g *GormRepository) getQuestionByTitle(qID string) (*dbQuestion, error) {
+	var dbQ dbQuestion
+	err := g.db.Where("title = ?", qID).First(&dbQ).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &dbQ, nil
 }
