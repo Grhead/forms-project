@@ -17,13 +17,16 @@ type FormRepository interface {
 	CreatePossibleAnswer(pa *domain.PossibleAnswer, qID string) (*domain.PossibleAnswer, error)
 	createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
 	CreateFormsQuestion(f *domain.Form, qID string) error
-	CreateAnswer(a *domain.Answer) error
+	CreateAnswer(a *domain.Answer, formID string, questionID string, environmentID string) error
 
-	getQuestionByTitle(qID string) (*dbQuestion, error)
+	GetQuestionByTitle(qTitle string) (*dbQuestion, error)
 	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)
 	GetForm(internalID string) (*domain.Form, error)
 	GetFormExternalID(internalID string) (string, error)
+	getFormsQuestionID(formID string, questinID string) (string, error)
+	CheckResponseEnvironmentExists(environment string) (bool, error)
 
+	GetQuestionIDs(formID string) ([]string, error)
 	Migrate() error
 	CheckExists() (bool, error)
 }

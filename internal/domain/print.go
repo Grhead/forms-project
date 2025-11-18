@@ -37,8 +37,8 @@ func (p *PossibleAnswer) Print() string {
 	return result
 }
 func (a *Answer) Print() string {
-	var result = fmt.Sprintf("ID: %s SubmittedAt: %s Content: %s",
-		a.ID, a.SubmittedAt, a.Content)
+	var result = fmt.Sprintf("SubmittedAt: %s Content: %s",
+		a.SubmittedAt, a.Content)
 	return result
 }
 func (t *QuestionType) Print() string {

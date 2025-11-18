@@ -6,24 +6,13 @@ import (
 	"time"
 	"tusur-forms/internal/database"
 	"tusur-forms/internal/domain"
+	service "tusur-forms/internal/services/forms"
 
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/forms/v1"
 	"google.golang.org/api/option"
 )
-
-type FormServiceProvider interface {
-	NewService(ctx context.Context, filename string) (FormService, error)
-}
-
-type FormService interface {
-	NewForm(title string, documentTitle string) (domain.Form, error)
-	GetForm(formExternalID string) (domain.Form, error)
-	SetQuestions(form domain.Form, questions []*domain.Question) (domain.Form, error)
-	GetResponseList()
-	GetResponse()
-}
 
 type GoogleForms struct {
 	TokenSource oauth2.TokenSource
@@ -33,7 +22,7 @@ type googleFormsAdapter struct {
 	repository   database.FormRepository
 }
 
-func (g *GoogleForms) NewService(ctx context.Context, r database.FormRepository) (FormService, error) {
+func (g *GoogleForms) NewService(ctx context.Context, r database.FormRepository) (service.FormService, error) {
 	svc, err := forms.NewService(ctx, option.WithTokenSource(g.TokenSource))
 	if err != nil {
 		return nil, err
@@ -69,25 +58,26 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 	return f, nil
 }
 
-func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
+func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, error) {
 	log.Println("GetForm berfore external")
 	externalID, err := g.repository.GetFormExternalID(formID)
 	if err != nil {
 		log.Println("externalID")
-		return domain.Form{}, err
+		return nil, err
 	}
 	response, err := g.googleClient.Forms.Get(externalID).Do()
 	if err != nil {
-		log.Println("response")
-		return domain.Form{}, err
+		return nil, err
 	}
-	questions := make([]*domain.Question, 0, len(response.Items))
+	responses := make([]*service.FormResponseUniqResp, 0, len(response.Items))
+	var questions []*domain.Question
 	for _, i := range response.Items {
-		tempQuestion := domain.Question{
+		tempQuestion := domain.Question{ // EMPTY TYPE
 			Title:           i.Title,
 			Description:     i.Description,
 			Type:            domain.QuestionType{},
 			IsRequired:      i.QuestionItem.Question.Required,
+			Answers:         nil,
 			PossibleAnswers: nil,
 		}
 		if i.QuestionItem.Question.ChoiceQuestion != nil {
@@ -101,20 +91,41 @@ func (g *googleFormsAdapter) GetForm(formID string) (domain.Form, error) {
 			}
 			tempQuestion.PossibleAnswers = answers
 		}
-		questions = append(questions, &tempQuestion)
+		keyID, err := g.repository.GetQuestionByTitle(tempQuestion.Title)
+		if err != nil {
+			return nil, err
+		}
+		responses, err = g.GetResponseList(externalID, i.QuestionItem.Question.QuestionId, keyID.ID)
 
+		if err != nil {
+			return nil, err
+		}
+		for _, ansQ := range responses {
+			for _, af := range ansQ.Answers {
+				tempQuestion.Answers = append(tempQuestion.Answers, &af)
+			}
+		}
+		questions = append(questions, &tempQuestion)
+		log.Println(len(responses))
+
+		// responses = anss
 	}
-	f := domain.Form{
+	for _, item := range responses {
+		for key, answer := range item.Answers {
+			log.Println("KEY " + key + "ANSWER " + answer.Content)
+		}
+	}
+	f := service.FormUniqResp{
 		ID:            formID,
 		ExternalID:    externalID,
 		Title:         response.Info.Title,
 		DocumentTitle: response.Info.DocumentTitle,
-		CreatedAt:     time.Time{},
+		Responses:     responses,
 		Questions:     questions,
 	}
-	return f, nil
+	return &f, nil
 }
-func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.Question) (domain.Form, error) {
+func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.Question) (*domain.Form, error) {
 	var formItems []*forms.Item
 	var requests = make([]*forms.Request, 0, len(formItems))
 	for _, question := range questions {
@@ -169,16 +180,53 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 		&forms.BatchUpdateFormRequest{Requests: requests}).
 		Do()
 	if err != nil {
-		return domain.Form{}, err
+		return nil, err
 	}
 	result, err := g.GetForm(form.ID)
 	if err != nil {
-		return domain.Form{}, err
+		return nil, err
 	}
-	return result, nil
+	domainResult := result.ToDomain()
+	return &domainResult, nil
 }
-func (g *googleFormsAdapter) GetResponse()     {} //TODO create test
-func (g *googleFormsAdapter) GetResponseList() {} //TODO create test
+func (g *googleFormsAdapter) GetResponseList(externalID string, questionID string, keyQID string) ([]*service.FormResponseUniqResp, error) {
+	var responses []*service.FormResponseUniqResp
+	do, err := g.googleClient.Forms.Responses.List(externalID).Do()
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range do.Responses {
+		var answers = make(map[string]domain.Answer)
+
+		if item.Answers[questionID].TextAnswers == nil {
+			time, _ := time.Parse("2006-01-02 15:04", item.CreateTime)
+
+			answers[keyQID] = domain.Answer{
+				SubmittedAt: time,
+				Content:     "",
+			}
+		} else {
+			for _, ta := range item.Answers[questionID].TextAnswers.Answers {
+
+				time, _ := time.Parse("2006-01-02 15:04", item.CreateTime)
+				answers[keyQID] = domain.Answer{
+					SubmittedAt: time,
+					Content:     ta.Value,
+				}
+			}
+		}
+		responses = append(responses, &service.FormResponseUniqResp{
+			ResponseID: item.ResponseId,
+			Answers:    answers,
+		})
+	}
+	// for _, item := range responses {
+	// 	for key, answer := range item.Answers {
+	// 		log.Println("KEY " + key + "ANSWER " + answer.Content)
+	// 	}
+	// }
+	return responses, nil
+}
 
 //do, err := svc.Forms.Responses.Get("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", "ACYDBNiM1N6j4QdrilDTpgVTSkKATHRYAtblFpOQk8vRETDevLlA2_Fii-gSWHEJmJGZYAU").Do()
 //if err != nil {

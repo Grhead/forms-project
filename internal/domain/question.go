@@ -1,7 +1,7 @@
 package domain
 
 type Question struct {
-	//ID              string
+	// ID              string
 	Title           string
 	Description     string
 	Type            QuestionType

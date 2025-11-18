@@ -2,13 +2,12 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"tusur-forms/internal/config"
 	"tusur-forms/internal/database"
-	"tusur-forms/internal/domain"
-	"tusur-forms/internal/services/google"
+	"tusur-forms/internal/services/forms/google"
 	"tusur-forms/internal/services/orchectrators"
+	// "context"
 )
 
 func Run() error {
@@ -55,79 +54,43 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
+	 newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
 
-	quest1 := domain.Question{
-		Title:       "Это первый вопрос",
-		Description: "Ответь на любой RADIO",
-		Type: domain.QuestionType{
-			Title: domain.TypeRadio,
-		},
-		IsRequired:      true,
-		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый RADIO"}, {Content: "Второй RADIO"}, {Content: "Третий RADIO"}, {Content: "Четвёртый RADIO"}},
-	}
-	quest2 := domain.Question{
-		Title:       "Это второй вопрос",
-		Description: "Это оставь пустым",
-		Type: domain.QuestionType{
-			Title: domain.TypeText,
-		},
-		IsRequired:      true,
-		PossibleAnswers: []*domain.PossibleAnswer{},
-	}
-	quest3 := domain.Question{
-		Title:       "Это третий вопрос",
-		Description: "Ответь на любой RADIO",
-		Type: domain.QuestionType{
-			Title: domain.TypeRadio,
-		},
-		IsRequired:      true,
-		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый-второй RADIO"}, {Content: "Второй-третий RADIO"}, {Content: "Третий-пятый RADIO"}, {Content: "Четвёртый RADIO"}},
-	}
-	quest4 := domain.Question{
-		Title:       "Это четвертый вопрос",
-		Description: "Ответь на любой RADIO",
-		Type: domain.QuestionType{
-			Title: domain.TypeRadio,
-		},
-		IsRequired:      true,
-		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый-второй RADIO"}, {Content: "Не второй RADIO"}, {Content: "Не третий RADIO"}, {Content: "Не четвёртый RADIO"}},
-	}
-	quest5 := domain.Question{
-		Title:       "Это пятый вопрос",
-		Description: "Ответь следующим текстом (просто скопируй): 'Высокая громкость вредит вашему слуху'",
-		Type: domain.QuestionType{
-			Title: domain.TypeCheckbox,
-		},
-		IsRequired:      false,
-		PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый CHECK"}, {Content: "Второй CHECK"}, {Content: "Третий CHECK"}, {Content: "Четвёртый CHECK"}},
-	}
-	quest6 := domain.Question{
-		Title:       "Это шестой вопрос",
-		Description: "Оставь пустым, не трогай",
-		Type: domain.QuestionType{
-			Title: domain.TypeText,
-		},
-		IsRequired:      false,
-		PossibleAnswers: []*domain.PossibleAnswer{},
-	}
-	quest7 := domain.Question{
-		Title:       "Это седьмой вопрос",
-		Description: "Отметить более 3 чекбоксов",
-		Type: domain.QuestionType{
-			Title: domain.TypeCheckbox,
-		},
-		IsRequired:      true,
-		PossibleAnswers: []*domain.PossibleAnswer{{Content: "CHECK GANG"}, {Content: "Отметь меня"}, {Content: "И меня отметь"}, {Content: "А меня как хочешь"}},
-	}
-	forma, err := newOrchestrator.CheckoutForm("Testing ради Answers", "Попытка №17", []*domain.Question{&quest1, &quest2, &quest3, &quest4, &quest5, &quest6, &quest7})
+	// quest1 := domain.Question{
+	// 	Title:       "Это первый вопрос",
+	// 	Description: "Ответь на любой RADIO",
+	// 	Type: domain.QuestionType{
+	// 		Title: domain.TypeRadio,
+	// 	},
+	// 	IsRequired:      true,
+	// 	PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый RADIO"}, {Content: "Второй RADIO"}, {Content: "Третий RADIO"}, {Content: "Четвёртый RADIO"}},
+	// }
+	// quest2 := domain.Question{
+	// 	Title:       "Это второй вопрос",
+	// 	Description: "Это оставь пустым",
+	// 	Type: domain.QuestionType{
+	// 		Title: domain.TypeText,
+	// 	},
+	// 	IsRequired:      false,
+	// 	PossibleAnswers: []*domain.PossibleAnswer{},
+	// }
+	// quest3 := domain.Question{
+	// 	Title:       "Это третий вопрос",
+	// 	Description: "Ответь на любой RADIO",
+	// 	Type: domain.QuestionType{
+	// 		Title: domain.TypeRadio,
+	// 	},
+	// 	IsRequired:      true,
+	// 	PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый-второй RADIO"}, {Content: "Второй-третий RADIO"}, {Content: "Третий-пятый RADIO"}, {Content: "Четвёртый RADIO"}},
+	// }
+	// f, err := newOrchestrator.CheckoutForm("Testing ради Answers", "Попытка №19", []*domain.Question{&quest1, &quest2, &quest3})
+	// if err != nil {
+	// 	return err
+	// }
+	f, err := newOrchestrator.CheckoutAnswers("ae4941ed-f51e-4e2e-9d96-9781b8a2a67d")
 	if err != nil {
 		return err
 	}
-	f, err := gormRepo.GetForm(forma.ID)
-	if err != nil {
-		return err
-	}
-	fmt.Println(f.Print())
+	log.Println(f.Print())
 	return nil
 }

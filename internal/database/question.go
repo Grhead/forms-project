@@ -35,7 +35,7 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 			return "", err
 		}
 	}
-	dbQ, err := g.getQuestionByTitle(string(q.Type.Title))
+	dbQ, err := g.GetQuestionByTitle(string(q.Title))
 	if err != nil {
 		return "", err
 	}
@@ -98,14 +98,23 @@ func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType
 	return &dbQt, nil
 }
 
-func (g *GormRepository) getQuestionByTitle(qID string) (*dbQuestion, error) {
+func (g *GormRepository) GetQuestionByTitle(qTitle string) (*dbQuestion, error) {
 	var dbQ dbQuestion
-	err := g.db.Where("title = ?", qID).First(&dbQ).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
+	err := g.db.Where("title = ?", qTitle).First(&dbQ).Error
 	if err != nil {
 		return nil, err
 	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return &dbQ, nil
+}
+
+func (g *GormRepository) GetQuestionIDs(formID string) ([]string, error) {
+	var questions []string
+	err := g.db.Table("db_forms_questions").Where("form_id = ?", formID).Select("question_id").Find(&questions).Error
+	if err != nil {
+		return nil, err
+	}
+	return questions, nil
 }
