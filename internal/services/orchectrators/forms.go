@@ -62,19 +62,18 @@ func (s *FormsOrchestrator) CheckoutAnswers(formID string) (*domain.Form, error)
 	// 	return nil, err
 	// }
 	// var allowResp []string
-	for _, item := range form.Responses {
-		//exists, err := s.repository.CheckResponseEnvironmentExists(item.ResponseID)
-		//if err != nil {
-		//	return nil, err
-		//}
-		//if exists {
-		//	continue
-		//}
-		//log.Println(item.ResponseID)
+	for _, item := range form.Questions {
+		for _, f := range item.Answers {
+			exists, err := s.repository.CheckResponseEnvironmentExists(f.ResponseID)
+			if err != nil {
+				return nil, err
+			}
+			if exists {
+				continue
+			}
+			log.Println(f.ResponseID)
 
-		for key, f := range item.Answers {
-			log.Println("KEY " + key + "ANSWER " + f.Content)
-			err := s.repository.CreateAnswer(&f, formID, key, item.ResponseID)
+			err = s.repository.CreateAnswer(f.ToDomain(), formID, item.ID, f.ResponseID)
 			if err != nil {
 				return nil, err
 			}

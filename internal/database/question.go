@@ -36,27 +36,26 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 		}
 	}
 	log.Println("QUsr")
-	dbQ, err := g.GetQuestionByTitle(q.Title)
+	dbQID, err := g.GetQuestionIDByTitle(q.Title)
 	if err != nil {
 		log.Println("Error getting question")
 		return "", err
 	}
-	log.Println(dbQ)
-	if dbQ == nil { //TODO
+	log.Println(dbQID)
+	if dbQID == "" { //TODO
 		qID = uuid.NewString()
-		dbQ = &dbQuestion{
+		err = g.db.Create(&dbQuestion{
 			ID:          qID,
 			Title:       q.Title,
 			Description: q.Description,
 			IsRequired:  q.IsRequired,
 			TypeID:      dbQt.ID,
-		}
-		err = g.db.Create(&dbQ).Error
+		}).Error
 		if err != nil {
 			return "", err
 		}
 	} else {
-		qID = dbQ.ID
+		qID = dbQID
 	}
 
 	if q.Type.Title == domain.TypeCheckbox || q.Type.Title == domain.TypeRadio {
@@ -105,16 +104,16 @@ func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType
 	return dbQt[0], nil
 }
 
-func (g *GormRepository) GetQuestionByTitle(qTitle string) (*dbQuestion, error) {
+func (g *GormRepository) GetQuestionIDByTitle(qTitle string) (string, error) {
 	var dbQ []*dbQuestion
 	err := g.db.Where("title = ?", qTitle).Limit(1).Find(&dbQ).Error
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if len(dbQ) == 0 {
-		return nil, nil
+		return "", nil
 	}
-	return dbQ[0], nil
+	return dbQ[0].ID, nil
 }
 
 func (g *GormRepository) GetQuestionIDs(formID string) ([]string, error) {

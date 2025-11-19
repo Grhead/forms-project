@@ -59,78 +59,83 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 }
 
 func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, error) {
-	log.Println("GetForm berfore external")
 	externalID, err := g.repository.GetFormExternalID(formID)
 	if err != nil {
-		log.Println("externalID")
 		return nil, err
 	}
-	response, err := g.googleClient.Forms.Get(externalID).Do()
+	resultForm, err := g.googleClient.Forms.Get(externalID).Do()
 	if err != nil {
 		return nil, err
 	}
-	var responses []*service.FormResponseUniqResp
-	var questions []*domain.Question
+	responseList, err := g.googleClient.Forms.Responses.List(externalID).Do()
+	if err != nil {
+		return nil, err
+	}
+	var questions []*service.QuestionUniqResp
 
-	for _, i := range response.Items {
-		innerResponses := make([]*service.FormResponseUniqResp, 0, len(response.Items))
-
-		tempQuestion := domain.Question{ // EMPTY TYPE
-			Title:           i.Title,
-			Description:     i.Description,
-			Type:            domain.QuestionType{},
-			IsRequired:      i.QuestionItem.Question.Required,
-			Answers:         nil,
-			PossibleAnswers: nil,
+	for _, item := range resultForm.Items {
+		if item.QuestionItem == nil {
+			continue
 		}
-		if i.QuestionItem.Question.ChoiceQuestion != nil {
-			answers := make([]*domain.PossibleAnswer, 0, len(response.Items))
+		googleQID := item.QuestionItem.Question.QuestionId
+		qInternalID, err := g.repository.GetQuestionIDByTitle(item.Title)
+		if err != nil || qInternalID == "" {
+			return nil, err
+		}
+		tempQuestion := service.QuestionUniqResp{
+			ID:          qInternalID,
+			Title:       item.Title,
+			Description: item.Description,
+			Type:        domain.QuestionType{},
+			IsRequired:  item.QuestionItem.Question.Required,
+			Answers:     make([]*service.AnswerUniq, 0),
+		}
+		if item.QuestionItem.Question.ChoiceQuestion != nil {
+			for _, opt := range item.QuestionItem.Question.ChoiceQuestion.Options {
+				tempQuestion.PossibleAnswers = append(tempQuestion.PossibleAnswers, &domain.PossibleAnswer{
+					Content: opt.Value,
+				})
+			}
+		}
+		for _, resp := range responseList.Responses {
+			if answerItem, ok := resp.Answers[googleQID]; ok {
+				if answerItem.TextAnswers != nil && len(answerItem.TextAnswers.Answers) > 0 {
+					for _, textAnswer := range answerItem.TextAnswers.Answers {
+						t, _ := time.Parse(time.RFC3339, resp.CreateTime)
+						domainAns := service.AnswerUniq{
+							ResponseID:  resp.ResponseId,
+							Content:     textAnswer.Value,
+							SubmittedAt: t,
+						}
+						tempQuestion.Answers = append(tempQuestion.Answers, &domainAns)
+					}
+				} else {
+					t, _ := time.Parse(time.RFC3339, resp.CreateTime)
+					domainAns := service.AnswerUniq{
+						ResponseID:  resp.ResponseId,
+						Content:     "",
+						SubmittedAt: t,
+					}
+					tempQuestion.Answers = append(tempQuestion.Answers, &domainAns)
 
-			for _, q := range i.QuestionItem.Question.ChoiceQuestion.Options {
-				pAnswer := domain.PossibleAnswer{
-					Content: q.Value,
 				}
-				answers = append(answers, &pAnswer)
 			}
-			tempQuestion.PossibleAnswers = answers
 		}
-		keyID, err := g.repository.GetQuestionByTitle(tempQuestion.Title)
-		if err != nil {
-			return nil, err
-		}
-		innerResponses, err = g.GetResponseList(externalID, i.QuestionItem.Question.QuestionId, keyID.ID)
 
-		if err != nil {
-			return nil, err
-		}
-		for _, ansQ := range innerResponses {
-			for _, af := range ansQ.Answers {
-				tempQuestion.Answers = append(tempQuestion.Answers, &af)
-			}
-		}
-		responses = append(responses, innerResponses...)
 		questions = append(questions, &tempQuestion)
-		log.Println(len(responses))
-
-		// responses = anss
 	}
 
-	for _, item := range responses {
-		log.Println("NEW CYCLE")
-		for key, answer := range item.Answers {
-			log.Println("KEY " + key + "ANSWER " + answer.Content)
-		}
-	}
 	f := service.FormUniqResp{
 		ID:            formID,
 		ExternalID:    externalID,
-		Title:         response.Info.Title,
-		DocumentTitle: response.Info.DocumentTitle,
-		Responses:     responses,
+		Title:         resultForm.Info.Title,
+		DocumentTitle: resultForm.Info.DocumentTitle,
 		Questions:     questions,
 	}
+
 	return &f, nil
 }
+
 func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.Question) error {
 	var formItems []*forms.Item
 	var requests = make([]*forms.Request, 0, len(formItems))
@@ -191,44 +196,46 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 	log.Println("BOOM W")
 	return nil
 }
-func (g *googleFormsAdapter) GetResponseList(externalID string, questionID string, keyQID string) ([]*service.FormResponseUniqResp, error) {
-	var responses []*service.FormResponseUniqResp
-	do, err := g.googleClient.Forms.Responses.List(externalID).Do()
-	if err != nil {
-		return nil, err
-	}
-	for _, item := range do.Responses {
-		var answers = make(map[string]domain.Answer)
 
-		if item.Answers[questionID].TextAnswers == nil {
-			time, _ := time.Parse("2006-01-02 15:04", item.CreateTime)
-
-			answers[keyQID] = domain.Answer{
-				SubmittedAt: time,
-				Content:     "",
-			}
-		} else {
-			for _, ta := range item.Answers[questionID].TextAnswers.Answers {
-
-				time, _ := time.Parse("2006-01-02 15:04", item.CreateTime)
-				answers[keyQID] = domain.Answer{
-					SubmittedAt: time,
-					Content:     ta.Value,
-				}
-			}
-		}
-		responses = append(responses, &service.FormResponseUniqResp{
-			ResponseID: item.ResponseId,
-			Answers:    answers,
-		})
-	}
-	// for _, item := range responses {
-	// 	for key, answer := range item.Answers {
-	// 		log.Println("KEY " + key + "ANSWER " + answer.Content)
-	// 	}
-	// }
-	return responses, nil
-}
+//func (g *googleFormsAdapter) GetResponse(formID string, responseID string, questionID string, keyQID string) (service.FormResponseUniqResp, error) {
+//	AnswerDTO := service.FormResponseUniqResp{
+//		ResponseID: responseID,
+//		Answers:    make(map[string]domain.Answer),
+//	}
+//
+//	response, err := g.googleClient.Forms.Responses.Get(formID, responseID).Do()
+//	if err != nil {
+//		return service.FormResponseUniqResp{}, err
+//	}
+//	if item, ok := response.Answers[questionID]; ok {
+//		submittedTime, _ := time.Parse(time.RFC3339, response.CreateTime)
+//
+//		if item.TextAnswers == nil || len(item.TextAnswers.Answers) == 0 {
+//			AnswerDTO.Answers[keyQID] = domain.Answer{
+//				SubmittedAt: submittedTime,
+//				Content:     "",
+//			}
+//		} else {
+//			var values []string
+//			for _, ta := range item.TextAnswers.Answers {
+//				values = append(values, ta.Value)
+//			}
+//
+//			content := strings.Join(values, ", ")
+//
+//			AnswerDTO.Answers[keyQID] = domain.Answer{
+//				SubmittedAt: submittedTime,
+//				Content:     content,
+//			}
+//		}
+//	}
+//	// for _, item := range responses {
+//	// 	for key, answer := range item.Answers {
+//	// 		log.Println("KEY " + key + "ANSWER " + answer.Content)
+//	// 	}
+//	// }
+//	return AnswerDTO, nil
+//}
 
 //do, err := svc.Forms.Responses.Get("10zLnhdRl84-poEbECNzTFcpKcYXfnaSoCXoX8vNorG8", "ACYDBNiM1N6j4QdrilDTpgVTSkKATHRYAtblFpOQk8vRETDevLlA2_Fii-gSWHEJmJGZYAU").Do()
 //if err != nil {
