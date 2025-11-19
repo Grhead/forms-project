@@ -1,8 +1,6 @@
 package database
 
 import (
-	"tusur-forms/internal/domain"
-
 	"github.com/google/uuid"
 )
 
@@ -14,10 +12,10 @@ type dbFormsQuestion struct {
 	Question   dbQuestion `gorm:"foreignKey:QuestionID;references:ID"`
 }
 
-func (g *GormRepository) CreateFormsQuestion(f *domain.Form, qID string) error {
+func (g *GormRepository) CreateFormsQuestion(fID string, qID string) error {
 	dbQ := dbFormsQuestion{
 		ID:         uuid.NewString(),
-		FormID:     f.ID,
+		FormID:     fID,
 		Form:       dbForm{},
 		QuestionID: qID,
 		Question:   dbQuestion{},

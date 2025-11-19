@@ -1,11 +1,10 @@
 package database
 
 import (
-	"errors"
+	"log"
 	"tusur-forms/internal/domain"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type dbQuestion struct {
@@ -30,16 +29,20 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 		return "", err
 	}
 	if dbQt == nil {
+		log.Println("Question type not found")
 		dbQt, err = g.createQuestionType(&q.Type)
 		if err != nil {
 			return "", err
 		}
 	}
-	dbQ, err := g.GetQuestionByTitle(string(q.Title))
+	log.Println("QUsr")
+	dbQ, err := g.GetQuestionByTitle(q.Title)
 	if err != nil {
+		log.Println("Error getting question")
 		return "", err
 	}
-	if dbQ == nil {
+	log.Println(dbQ)
+	if dbQ == nil { //TODO
 		qID = uuid.NewString()
 		dbQ = &dbQuestion{
 			ID:          qID,
@@ -57,7 +60,10 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 	}
 
 	if q.Type.Title == domain.TypeCheckbox || q.Type.Title == domain.TypeRadio {
+		log.Println("Im creation")
 		for _, item := range q.PossibleAnswers {
+			log.Println(item.Print())
+
 			paID, err := g.getPossibleAnswer(item)
 			if err != nil {
 				return "", err
@@ -75,6 +81,7 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 }
 
 func (g *GormRepository) createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error) {
+	log.Println("Create Question Type")
 	dbQt := dbQuestionType{
 		ID:    uuid.NewString(),
 		Title: string(qt.Title),
@@ -87,32 +94,34 @@ func (g *GormRepository) createQuestionType(qt *domain.QuestionType) (*dbQuestio
 }
 
 func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType, error) {
-	var dbQt dbQuestionType
-	err := g.db.Where("title = ?", qtTitle).First(&dbQt).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
+	var dbQt []*dbQuestionType
+	err := g.db.Where("title = ?", qtTitle).Limit(1).Find(&dbQt).Error
 	if err != nil {
 		return nil, err
 	}
-	return &dbQt, nil
+	if len(dbQt) == 0 {
+		return nil, nil
+	}
+	return dbQt[0], nil
 }
 
 func (g *GormRepository) GetQuestionByTitle(qTitle string) (*dbQuestion, error) {
-	var dbQ dbQuestion
-	err := g.db.Where("title = ?", qTitle).First(&dbQ).Error
+	var dbQ []*dbQuestion
+	err := g.db.Where("title = ?", qTitle).Limit(1).Find(&dbQ).Error
 	if err != nil {
 		return nil, err
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
+	if len(dbQ) == 0 {
 		return nil, nil
 	}
-	return &dbQ, nil
+	return dbQ[0], nil
 }
 
 func (g *GormRepository) GetQuestionIDs(formID string) ([]string, error) {
 	var questions []string
 	err := g.db.Table("db_forms_questions").Where("form_id = ?", formID).Select("question_id").Find(&questions).Error
+	log.Println("EMPTY")
+
 	if err != nil {
 		return nil, err
 	}

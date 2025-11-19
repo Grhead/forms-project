@@ -69,9 +69,12 @@ func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, erro
 	if err != nil {
 		return nil, err
 	}
-	responses := make([]*service.FormResponseUniqResp, 0, len(response.Items))
+	var responses []*service.FormResponseUniqResp
 	var questions []*domain.Question
+
 	for _, i := range response.Items {
+		innerResponses := make([]*service.FormResponseUniqResp, 0, len(response.Items))
+
 		tempQuestion := domain.Question{ // EMPTY TYPE
 			Title:           i.Title,
 			Description:     i.Description,
@@ -95,22 +98,25 @@ func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, erro
 		if err != nil {
 			return nil, err
 		}
-		responses, err = g.GetResponseList(externalID, i.QuestionItem.Question.QuestionId, keyID.ID)
+		innerResponses, err = g.GetResponseList(externalID, i.QuestionItem.Question.QuestionId, keyID.ID)
 
 		if err != nil {
 			return nil, err
 		}
-		for _, ansQ := range responses {
+		for _, ansQ := range innerResponses {
 			for _, af := range ansQ.Answers {
 				tempQuestion.Answers = append(tempQuestion.Answers, &af)
 			}
 		}
+		responses = append(responses, innerResponses...)
 		questions = append(questions, &tempQuestion)
 		log.Println(len(responses))
 
 		// responses = anss
 	}
+
 	for _, item := range responses {
+		log.Println("NEW CYCLE")
 		for key, answer := range item.Answers {
 			log.Println("KEY " + key + "ANSWER " + answer.Content)
 		}
@@ -125,7 +131,7 @@ func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, erro
 	}
 	return &f, nil
 }
-func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.Question) (*domain.Form, error) {
+func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.Question) error {
 	var formItems []*forms.Item
 	var requests = make([]*forms.Request, 0, len(formItems))
 	for _, question := range questions {
@@ -180,14 +186,10 @@ func (g *googleFormsAdapter) SetQuestions(form domain.Form, questions []*domain.
 		&forms.BatchUpdateFormRequest{Requests: requests}).
 		Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	result, err := g.GetForm(form.ID)
-	if err != nil {
-		return nil, err
-	}
-	domainResult := result.ToDomain()
-	return &domainResult, nil
+	log.Println("BOOM W")
+	return nil
 }
 func (g *googleFormsAdapter) GetResponseList(externalID string, questionID string, keyQID string) ([]*service.FormResponseUniqResp, error) {
 	var responses []*service.FormResponseUniqResp

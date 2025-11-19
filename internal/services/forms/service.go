@@ -58,6 +58,6 @@ type FormServiceProvider interface {
 type FormService interface {
 	NewForm(title string, documentTitle string) (domain.Form, error)
 	GetForm(formID string) (*FormUniqResp, error)
-	SetQuestions(form domain.Form, questions []*domain.Question) (*domain.Form, error)
+	SetQuestions(form domain.Form, questions []*domain.Question) error
 	GetResponseList(externalID string, questionID string, keyQID string) ([]*FormResponseUniqResp, error)
 }

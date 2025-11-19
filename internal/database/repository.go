@@ -16,7 +16,7 @@ type FormRepository interface {
 	createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error)
 	CreatePossibleAnswer(pa *domain.PossibleAnswer, qID string) (*domain.PossibleAnswer, error)
 	createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
-	CreateFormsQuestion(f *domain.Form, qID string) error
+	CreateFormsQuestion(fID string, qID string) error
 	CreateAnswer(a *domain.Answer, formID string, questionID string, environmentID string) error
 
 	GetQuestionByTitle(qTitle string) (*dbQuestion, error)

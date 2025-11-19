@@ -1,11 +1,9 @@
 package database
 
 import (
-	"errors"
 	"tusur-forms/internal/domain"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type dbPossibleAnswer struct {
@@ -54,13 +52,13 @@ func (g *GormRepository) createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID 
 }
 
 func (g *GormRepository) getPossibleAnswer(a *domain.PossibleAnswer) (*dbPossibleAnswer, error) {
-	var fq dbPossibleAnswer
-	err := g.db.Where("content = ?", a.Content).First(&fq).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
+	var fq []*dbPossibleAnswer
+	err := g.db.Where("content = ?", a.Content).Limit(1).Find(&fq).Error
 	if err != nil {
 		return nil, err
 	}
-	return &fq, nil
+	if len(fq) == 0 {
+		return nil, nil
+	}
+	return fq[0], nil
 }

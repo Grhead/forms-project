@@ -1,6 +1,7 @@
 package orchectrators
 
 import (
+	"log"
 	"tusur-forms/internal/database"
 	"tusur-forms/internal/domain"
 	service "tusur-forms/internal/services/forms"
@@ -29,22 +30,25 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, que
 		return nil, err
 	}
 	if len(questions) != 0 {
-		form, err = s.creator.SetQuestions(d, questions[0])
+		err = s.creator.SetQuestions(d, questions[0])
+
 		if err != nil {
 			return nil, err
 		}
 		for i := range questions[0] {
+			log.Println(questions[0][i])
 			qID, err := s.repository.CreateQuestion(questions[0][i])
 			if err != nil {
 				return nil, err
 			}
-			err = s.repository.CreateFormsQuestion(form, qID)
+			err = s.repository.CreateFormsQuestion(d.ID, qID)
 			if err != nil {
 				return nil, err
 			}
 		}
 		return form, nil
 	}
+	form, err = s.repository.GetForm(d.ID)
 	return form, nil
 }
 
@@ -59,25 +63,27 @@ func (s *FormsOrchestrator) CheckoutAnswers(formID string) (*domain.Form, error)
 	// }
 	// var allowResp []string
 	for _, item := range form.Responses {
-		// exists, err := s.repository.CheckResponseEnvironmentExists(item.ResponseID)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// if exists {
-		// 	continue
-		// }
-				// log.Println(item.ResponseID)
+		//exists, err := s.repository.CheckResponseEnvironmentExists(item.ResponseID)
+		//if err != nil {
+		//	return nil, err
+		//}
+		//if exists {
+		//	continue
+		//}
+		//log.Println(item.ResponseID)
 
 		for key, f := range item.Answers {
-				// log.Println(key)
-				// log.Println(f)
-				s.repository.CreateAnswer(&f, formID, key, item.ResponseID)
+			log.Println("KEY " + key + "ANSWER " + f.Content)
+			err := s.repository.CreateAnswer(&f, formID, key, item.ResponseID)
+			if err != nil {
+				return nil, err
 			}
-		// for key, answer := range item.Answers {
-		// 	log.Println("KEY " + key + "ANSWER " + answer.Content)
-		// }
+		}
+		//for key, answer := range item.Answers {
+		//	log.Println("KEY " + key + "ANSWER " + answer.Content)
+		//}
 	}
-	
+
 	// for _, i := range allowResp {
 	// 	for qID, question := range form.Questions {
 	// 		log.Println(question.Title)
