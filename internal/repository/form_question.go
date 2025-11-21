@@ -1,10 +1,10 @@
-package database
+package repository
 
 import (
 	"github.com/google/uuid"
 )
 
-type dbFormsQuestion struct {
+type dbFormsQuestions struct {
 	ID         string `gorm:"primaryKey"`
 	FormID     string
 	Form       dbForm `gorm:"foreignKey:FormID;references:ID"`
@@ -13,7 +13,7 @@ type dbFormsQuestion struct {
 }
 
 func (g *GormRepository) CreateFormsQuestion(fID string, qID string) error {
-	dbQ := dbFormsQuestion{
+	dbQ := dbFormsQuestions{
 		ID:         uuid.NewString(),
 		FormID:     fID,
 		Form:       dbForm{},

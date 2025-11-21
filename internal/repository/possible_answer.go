@@ -1,4 +1,4 @@
-package database
+package repository
 
 import (
 	"tusur-forms/internal/domain"

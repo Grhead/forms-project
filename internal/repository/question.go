@@ -1,4 +1,4 @@
-package database
+package repository
 
 import (
 	"log"
@@ -29,19 +29,15 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 		return "", err
 	}
 	if dbQt == nil {
-		log.Println("Question type not found")
 		dbQt, err = g.createQuestionType(&q.Type)
 		if err != nil {
 			return "", err
 		}
 	}
-	log.Println("QUsr")
 	dbQID, err := g.GetQuestionIDByTitle(q.Title)
 	if err != nil {
-		log.Println("Error getting question")
 		return "", err
 	}
-	log.Println(dbQID)
 	if dbQID == "" { //TODO
 		qID = uuid.NewString()
 		err = g.db.Create(&dbQuestion{
@@ -119,8 +115,6 @@ func (g *GormRepository) GetQuestionIDByTitle(qTitle string) (string, error) {
 func (g *GormRepository) GetQuestionIDs(formID string) ([]string, error) {
 	var questions []string
 	err := g.db.Table("db_forms_questions").Where("form_id = ?", formID).Select("question_id").Find(&questions).Error
-	log.Println("EMPTY")
-
 	if err != nil {
 		return nil, err
 	}

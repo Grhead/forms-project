@@ -37,6 +37,9 @@ func (p *PossibleAnswer) Print() string {
 	return result
 }
 func (a *Answer) Print() string {
+	if a == nil {
+		return ""
+	}
 	var result = fmt.Sprintf("SubmittedAt: %s Content: %s",
 		a.SubmittedAt, a.Content)
 	return result

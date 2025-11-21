@@ -1,4 +1,4 @@
-package database
+package repository
 
 func (g *GormRepository) Migrate() error {
 	err := g.db.AutoMigrate(
@@ -6,7 +6,7 @@ func (g *GormRepository) Migrate() error {
 		&dbQuestionType{},
 		&dbQuestion{},
 		&dbAnswer{},
-		&dbFormsQuestion{},
+		&dbFormsQuestions{},
 		&dbPossibleAnswer{},
 		&dbQuestionPossibleAnswer{})
 	return err

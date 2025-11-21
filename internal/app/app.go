@@ -1,41 +1,38 @@
 package app
 
 import (
-	"context"
 	"log"
 	"tusur-forms/internal/config"
-	"tusur-forms/internal/database"
-	"tusur-forms/internal/services/forms/google"
-	"tusur-forms/internal/services/orchectrators"
+	"tusur-forms/internal/repository"
 )
 
 func Run() error {
-	ctx := context.Background()
+	//ctx := context.Background()
 
 	cfgProvider := &config.EnvConfigProvider{}
-	formCfg, err := cfgProvider.LoadFormConfig()
-	if err != nil {
-		return err
-	}
+	//formCfg, err := cfgProvider.LoadFormConfig()
+	//if err != nil {
+	//	return err
+	//}
 	dbCfg, err := cfgProvider.LoadDBConfig()
 	if err != nil {
 		return err
 	}
-	oauthConfig := config.NewOAuth2Config(formCfg)
-	tokenConfig, err := config.ReadToken(formCfg.TokenPath)
-	if err != nil {
-		return err
-	}
-	tokenSource := oauthConfig.TokenSource(ctx, tokenConfig)
-	googleProvider := google.GoogleForms{
-		TokenSource: tokenSource,
-	}
+	//oauthConfig := config.NewOAuth2Config(formCfg)
+	//tokenConfig, err := config.ReadToken(formCfg.TokenPath)
+	//if err != nil {
+	//	return err
+	//}
+	//tokenSource := oauthConfig.TokenSource(ctx, tokenConfig)
+	//googleProvider := google.GoogleForms{
+	//	TokenSource: tokenSource,
+	//}
 	dbProvider := &config.DBSQLiteProvider{}
 	db, err := dbProvider.Connect(dbCfg)
 	if err != nil {
 		return err
 	}
-	gormRepo := database.NewGormRepository(db)
+	gormRepo := repository.NewGormRepository(db)
 	exists, err := gormRepo.CheckExists()
 	if err != nil {
 		return err
@@ -49,11 +46,11 @@ func Run() error {
 		log.Println("Successfully migrated database")
 	}
 
-	service, err := googleProvider.NewService(ctx, gormRepo)
-	if err != nil {
-		return err
-	}
-	newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
+	//service, err := googleProvider.NewService(ctx, gormRepo)
+	//if err != nil {
+	//	return err
+	//}
+	//newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
 
 	//quest1 := domain.Question{
 	//	Title:       "Это первый вопрос",
@@ -86,10 +83,16 @@ func Run() error {
 	//if err != nil {
 	//	return err
 	//}
-	f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
+	//f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
+	//if err != nil {
+	//	return err
+	//}
+	//log.Println(f.Print())
+
+	form, err := gormRepo.GetForm("ae66e57e-b0dd-4404-836c-9c5d015f0309")
 	if err != nil {
 		return err
 	}
-	log.Println(f.Print())
+	log.Println(form.Print())
 	return nil
 }

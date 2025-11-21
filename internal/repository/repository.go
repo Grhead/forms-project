@@ -1,4 +1,4 @@
-package database
+package repository
 
 import (
 	"tusur-forms/internal/domain"
@@ -13,20 +13,21 @@ type GormRepository struct {
 type FormRepository interface {
 	CreateForm(f *domain.Form) error
 	CreateQuestion(q *domain.Question) (string, error)
+	CreateAnswer(a *domain.Answer, formID string, questionID string, environmentID string) error
+	CreateFormsQuestion(fID string, qID string) error
 	createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error)
 	CreatePossibleAnswer(pa *domain.PossibleAnswer, qID string) (*domain.PossibleAnswer, error)
 	createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
-	CreateFormsQuestion(fID string, qID string) error
-	CreateAnswer(a *domain.Answer, formID string, questionID string, environmentID string) error
 
-	GetQuestionIDByTitle(qTitle string) (string, error)
-	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)
 	GetForm(internalID string) (*domain.Form, error)
 	GetFormExternalID(internalID string) (string, error)
-	getFormsQuestionID(formID string, questinID string) (string, error)
-	CheckResponseEnvironmentExists(environment string) (bool, error)
-
+	GetAnswers(formID string, questionID string) ([]*domain.Answer, error)
 	GetQuestionIDs(formID string) ([]string, error)
+	GetQuestionIDByTitle(qTitle string) (string, error)
+	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)
+	getFormsQuestionID(formID string, questinID string) (string, error)
+
+	CheckResponseEnvironmentExists(environment string) (bool, error)
 	Migrate() error
 	CheckExists() (bool, error)
 }
