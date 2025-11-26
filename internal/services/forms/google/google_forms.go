@@ -2,6 +2,7 @@ package google
 
 import (
 	"context"
+	"log/slog"
 	"time"
 	"tusur-forms/internal/domain"
 	"tusur-forms/internal/repository"
@@ -24,6 +25,7 @@ type googleFormsAdapter struct {
 func (g *GoogleForms) NewService(ctx context.Context, r repository.FormRepository) (service.FormService, error) {
 	svc, err := forms.NewService(ctx, option.WithTokenSource(g.TokenSource))
 	if err != nil {
+		slog.Error("Failed to create new GoogleForms service", "err", err)
 		return nil, err
 	}
 	adapter := &googleFormsAdapter{
@@ -42,6 +44,7 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 	}
 	result, err := g.googleClient.Forms.Create(gf).Do()
 	if err != nil {
+		slog.Error("Failed to create new GoogleForm", "err", err)
 		return domain.Form{}, err
 	}
 
@@ -59,14 +62,17 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, error) {
 	externalID, err := g.repository.GetFormExternalID(formID)
 	if err != nil {
+		slog.Error("Failed to get external id from repository", "form_id", formID, "error", err)
 		return nil, err
 	}
 	resultForm, err := g.googleClient.Forms.Get(externalID).Do()
 	if err != nil {
+		slog.Error("Failed to get form", "external_id", externalID, "error", err)
 		return nil, err
 	}
 	responseList, err := g.googleClient.Forms.Responses.List(externalID).Do()
 	if err != nil {
+		slog.Error("Failed to get responses list", "external_id", externalID, "error", err)
 		return nil, err
 	}
 	var questions []*service.QuestionUniqResp
@@ -78,6 +84,7 @@ func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, erro
 		googleQID := item.QuestionItem.Question.QuestionId
 		qInternalID, err := g.repository.GetQuestionIDByTitle(item.Title)
 		if err != nil || qInternalID == "" {
+			slog.Error("Failed to get question id by title", "question_title", item.Title, "form_id", formID, "error", err)
 			return nil, err
 		}
 		tempQuestion := service.QuestionUniqResp{
@@ -187,6 +194,7 @@ func (g *googleFormsAdapter) SetQuestions(form *domain.Form, questions []*domain
 		&forms.BatchUpdateFormRequest{Requests: requests}).
 		Do()
 	if err != nil {
+		slog.Error("Failed to batch update form", "external_id", form.ExternalID, "internal_id", form.ID, "err", err)
 		return err
 	}
 	return nil
