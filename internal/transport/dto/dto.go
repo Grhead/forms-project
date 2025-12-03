@@ -4,14 +4,29 @@ import (
 	"time"
 )
 
-type Form struct {
-	Title         string      `json:"title"`
-	DocumentTitle string      `json:"documentTitle"`
-	CreatedAt     time.Time   `json:"createdAt"`
-	Questions     []*Question `json:"questions"`
+type ResponseForm struct {
+	ExternalID    string              `json:"externalID"`
+	Title         string              `json:"title"`
+	DocumentTitle string              `json:"documentTitle"`
+	CreatedAt     time.Time           `json:"createdAt"`
+	Questions     []*ResponseQuestion `json:"questions"`
 }
 
-type Question struct {
+type ResponseQuestion struct {
+	Title           string            `json:"title"`
+	Description     string            `json:"description"`
+	Type            string            `json:"type"`
+	IsRequired      bool              `json:"isRequired"`
+	PossibleAnswers []*PossibleAnswer `json:"possibleAnswers"`
+}
+
+type RequestForm struct {
+	Title         string             `json:"title"`
+	DocumentTitle string             `json:"documentTitle"`
+	Questions     []*RequestQuestion `json:"questions"`
+}
+
+type RequestQuestion struct {
 	Title           string            `json:"title"`
 	Description     string            `json:"description"`
 	Type            string            `json:"type"`

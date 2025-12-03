@@ -17,7 +17,7 @@ type FormRepository interface {
 	CreateFormsQuestion(fID string, qID string) error
 	createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error)
 	CreatePossibleAnswer(pa *domain.PossibleAnswer, qID string) (*domain.PossibleAnswer, error)
-	createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
+	CreateQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
 
 	GetForm(internalID string, isExternal bool) (*domain.Form, error)
 	GetForms() ([]*domain.Form, error)

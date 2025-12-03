@@ -24,7 +24,7 @@ func (g *GormRepository) CreatePossibleAnswer(pa *domain.PossibleAnswer, qID str
 		ID:      uuid.NewString(),
 		Content: pa.Content,
 	}
-	err := g.createQuestionPossibleAnswer(&dbPa, qID)
+	err := g.CreateQuestionPossibleAnswer(&dbPa, qID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (g *GormRepository) CreatePossibleAnswer(pa *domain.PossibleAnswer, qID str
 	return &domain.PossibleAnswer{Content: dbPa.Content}, nil
 }
 
-func (g *GormRepository) createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error {
+func (g *GormRepository) CreateQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error {
 	dbF := dbQuestionPossibleAnswer{
 		ID:               uuid.NewString(),
 		QuestionID:       qID,

@@ -1,6 +1,8 @@
 package domain
 
-import "tusur-forms/internal/transport/dto"
+import (
+	"tusur-forms/internal/transport/dto"
+)
 
 type Question struct {
 	Title           string
@@ -28,14 +30,14 @@ const TypeText QuestionTypeTitles = "TEXT"
 //const TypeDate QuestionTypeTitles = "DATE"
 //const ScaleQuestion QuestionTypeTitles = "SCALE"
 
-func (q *Question) ToDTO() *dto.Question {
+func (q *Question) ToDTO() *dto.ResponseQuestion {
 	var pa = make([]*dto.PossibleAnswer, 0, len(q.PossibleAnswers))
 	for _, p := range q.PossibleAnswers {
 		pa = append(pa, &dto.PossibleAnswer{
 			Content: p.Content,
 		})
 	}
-	return &dto.Question{
+	return &dto.ResponseQuestion{
 		Title:           q.Title,
 		Description:     q.Description,
 		Type:            string(q.Type.Title),

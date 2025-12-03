@@ -11,8 +11,9 @@ func (o *Orchestrator) GetQuestions(w http.ResponseWriter, r *http.Request) {
 	questions, err := o.FormsOrchestrator.GetQuestions()
 	if err != nil {
 		http.Error(w, "Internal error", 500)
+		return
 	}
-	var qs = make([]*dto.Question, 0, len(questions))
+	var qs = make([]*dto.ResponseQuestion, 0, len(questions))
 	for _, q := range questions {
 		qs = append(qs, q.ToDTO())
 	}
@@ -25,6 +26,7 @@ func (o *Orchestrator) GetForm(w http.ResponseWriter, r *http.Request) {
 	id := queryVals.Get("form_id")
 	form, err := o.FormsOrchestrator.GetForm(id, true)
 	if err != nil {
+		http.Error(w, "Internal error", 500)
 		return
 	}
 	f := form.ToDTO()
@@ -36,8 +38,9 @@ func (o *Orchestrator) GetForms(w http.ResponseWriter, r *http.Request) {
 	forms, err := o.FormsOrchestrator.GetForms()
 	if err != nil {
 		http.Error(w, "Internal error", 500)
+		return
 	}
-	var fs = make([]*dto.Form, 0, len(forms))
+	var fs = make([]*dto.ResponseForm, 0, len(forms))
 	for _, f := range forms {
 		fs = append(fs, f.ToDTO())
 	}

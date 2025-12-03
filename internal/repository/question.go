@@ -55,16 +55,18 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 	}
 
 	if q.Type.Title == domain.TypeCheckbox || q.Type.Title == domain.TypeRadio {
-		log.Println("Im creation")
 		for _, item := range q.PossibleAnswers {
-			log.Println(item.Print())
-
-			paID, err := g.getPossibleAnswer(item)
+			pa, err := g.getPossibleAnswer(item)
 			if err != nil {
 				return "", err
 			}
-			if paID == nil {
+			if pa == nil {
 				_, err = g.CreatePossibleAnswer(item, qID)
+				if err != nil {
+					return "", err
+				}
+			} else {
+				err = g.CreateQuestionPossibleAnswer(pa, qID)
 				if err != nil {
 					return "", err
 				}
@@ -76,7 +78,6 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 }
 
 func (g *GormRepository) createQuestionType(qt *domain.QuestionType) (*dbQuestionType, error) {
-	log.Println("Create Question Type")
 	dbQt := dbQuestionType{
 		ID:    uuid.NewString(),
 		Title: string(qt.Title),

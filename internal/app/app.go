@@ -72,11 +72,11 @@ func Run() error {
 	transportEntity := transport.NewOrchestrator(newOrchestrator)
 
 	r.Get("/questions", transportEntity.GetQuestions)
-	r.Post("/questions", transportEntity.CreateQuestion)
+	r.Post("/question", transportEntity.CreateQuestion)
 
 	r.Get("/form", transportEntity.GetForm)
 	r.Get("/forms", transportEntity.GetForms)
-	r.Post("/forms", transportEntity.CreateForm)
+	r.Post("/form", transportEntity.CreateForm)
 
 	r.Post("/generate", transportEntity.GenerateXlsx)
 
@@ -85,51 +85,12 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	//quest1 := domain.Question{
-	//	Title:       "Это первый вопрос",
-	//	Description: "Ответь на любой RADIO",
-	//	Type: domain.QuestionType{
-	//		Title: domain.TypeRadio,
-	//	},
-	//	IsRequired:      true,
-	//	PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый RADIO"}, {Content: "Второй RADIO"}, {Content: "Третий RADIO"}, {Content: "Четвёртый RADIO"}},
-	//}
-	//quest2 := domain.Question{
-	//	Title:       "Это второй вопрос",
-	//	Description: "Это оставь пустым",
-	//	Type: domain.QuestionType{
-	//		Title: domain.TypeText,
-	//	},
-	//	IsRequired:      false,
-	//	PossibleAnswers: []*domain.PossibleAnswer{},
-	//}
-	//quest3 := domain.Question{
-	//	Title:       "Это третий вопрос",
-	//	Description: "Ответь на любой RADIO",
-	//	Type: domain.QuestionType{
-	//		Title: domain.TypeRadio,
-	//	},
-	//	IsRequired:      true,
-	//	PossibleAnswers: []*domain.PossibleAnswer{{Content: "Первый-второй RADIO"}, {Content: "Второй-третий RADIO"}, {Content: "Третий-пятый RADIO"}, {Content: "Четвёртый RADIO"}},
-	//}
-	//_, err = newOrchestrator.CheckoutForm("Testing ради Answers", "Попытка №19", []*domain.Question{&quest1, &quest2, &quest3})
-	//if err != nil {
-	//	return err
-	//}
 	//f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
 	//if err != nil {
 	//	return err
 	//}
 	//log.Println(f.Print())
 	//
-	//form, err := gormRepo.GetForm("ae66e57e-b0dd-4404-836c-9c5d015f0309", false)
-	//if err != nil {
-	//	return err
-	//}
-	//if form == nil {
-	//	return fmt.Errorf("form does not exists")
-	//}
-	//log.Println(form.Print())
 	//file := reports.CreateFile()
 	//index, err := file.CreateSpreadsheet(form.Title)
 	//if err != nil {

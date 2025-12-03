@@ -18,6 +18,14 @@ func NewFormsOrchestrator(c service.FormService, r repository.FormRepository) *F
 	}
 }
 
+func (s *FormsOrchestrator) CheckoutQuestion(question *domain.Question) (string, error) {
+	createQuestionID, err := s.repository.CreateQuestion(question)
+	if err != nil {
+		return "", err
+	}
+	return createQuestionID, nil
+}
+
 func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, questions ...[]*domain.Question) (*domain.Form, error) {
 	var form *domain.Form
 	d, err := s.creator.NewForm(title, documentTitle)
@@ -34,16 +42,21 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, que
 			return nil, err
 		}
 		for i := range questions[0] {
-			qID, err := s.repository.CreateQuestion(questions[0][i])
+			isQuestionExists, err := s.repository.GetQuestionIDByTitle(questions[0][i].Title)
 			if err != nil {
 				return nil, err
 			}
-			err = s.repository.CreateFormsQuestion(d.ID, qID)
+			if isQuestionExists == "" {
+				isQuestionExists, err = s.repository.CreateQuestion(questions[0][i])
+				if err != nil {
+					return nil, err
+				}
+			}
+			err = s.repository.CreateFormsQuestion(d.ID, isQuestionExists)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return form, nil
 	}
 	form, err = s.repository.GetForm(d.ID, false)
 	return form, nil
