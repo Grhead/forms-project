@@ -24,6 +24,7 @@ type DBConfig struct {
 type CfgProvider interface {
 	LoadFormConfig() (FormConfig, error)
 	LoadDbConfig() (DBConfig, error)
+	LoadMainHtml() (string, error)
 }
 type DatabaseProvider interface {
 	Connect(cfg DBConfig) (*gorm.DB, error)
@@ -54,6 +55,19 @@ func (e *EnvConfigProvider) LoadDBConfig() (*DBConfig, error) {
 		fileName: os.Getenv("FILE_NAME"),
 	}
 	return cfg, nil
+}
+
+func (e *EnvConfigProvider) LoadMainHtml() ([]byte, error) {
+	err := godotenv.Load("configs/.env.form")
+	filename := os.Getenv("HTML_PATH")
+	if err != nil {
+		return nil, err
+	}
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func (s *DBSQLiteProvider) Connect(cfg *DBConfig) (*gorm.DB, error) {

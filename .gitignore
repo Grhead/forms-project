@@ -2,6 +2,7 @@ configs/.env.form
 configs/.env.database
 configs/token.json
 .idea/
+.vscode/
 
 vendor/
 local/

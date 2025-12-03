@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>TUSUR Forms | Система Анализа</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+   <div class="background-animated"></div>
+    <div class="main-card-glass">
+        <header class="header-logo">
+           <i class="fas fa-graduation-cap logo-icon"></i>
+       </header>
+        <main class="content">
+           <h1 class="title-3d">TUSUR Forms</h1>
+            <p class="subtitle">
+               Интеллектуальная система анализа обратной связи ВУЗа.
+           </p>
+       </main>
+        <footer class="footer-links">
+           <a href="https://tusur.ru/" target="_blank">Официальный сайт ТУСУР</a>
+       </footer>
+   </div>
+</body>
+</html>
+<style>
+   :root {
+       --purple-main: #6c5ce7;
+       --purple-dark: #4527a0;
+       --purple-light: #a29bfe;
+       --purple-glow: #e0f7fa;
+       --glass-color: rgba(255, 255, 255, 0.15);
+       --glass-border: rgba(255, 255, 255, 0.5);
+       --text-color: #f3e5f5;
+       --shadow-color: rgba(0, 0, 0, 0.4);
+   }
+   * {
+       box-sizing: border-box;
+       margin: 0;
+       padding: 0;
+       font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   }
+    html,
+   body {
+       height: 100%;
+       overflow: hidden;
+   }
+    body {
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple-main) 100%);
+       color: var(--text-color);
+   }
+    @keyframes moveShapes {
+       0% {
+           transform: translate(0, 0) scale(1);
+           opacity: 0.5;
+       }
+        100% {
+           transform: translate(100px, 50px) scale(1.1);
+           opacity: 0.7;
+       }
+   }
+   .main-card-glass {
+       background: var(--glass-color);
+       backdrop-filter: blur(20px) saturate(180%);
+       -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-radius: 30px;
+       border: 1px solid var(--glass-border);
+       padding: 50px 70px;
+       max-width: 750px;
+       width: 90%;
+       text-align: center;
+       box-shadow: 0 15px 50px 0 var(--shadow-color);
+       transform: perspective(1000px) rotateX(0deg);
+       transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+   }
+    .main-card-glass:hover {
+       transform: perspective(2000px) rotateX(1deg) scale(1.01);
+       box-shadow: 0 25px 60px 0 var(--shadow-color);
+   }
+   .title-3d {
+       font-size: 5.5rem;
+       font-weight: 900;
+       color: var(--purple-glow);
+       margin-bottom: 15px;
+       letter-spacing: 7px;
+       text-shadow:
+           0 0 15px var(--purple-light),
+           0 0 30px var(--purple-main),
+           0 0 60px var(--purple-light);
+        animation: textFlicker 4s infinite alternate;
+   }
+    @keyframes textFlicker {
+       0% {
+           opacity: 1;
+           text-shadow: 0 0 10px var(--purple-glow);
+       }
+        50% {
+           opacity: 0.95;
+           text-shadow: 0 0 20px var(--purple-light), 0 0 40px var(--purple-main);
+       }
+        100% {
+           opacity: 1;
+           text-shadow: 0 0 15px var(--purple-glow), 0 0 30px var(--purple-light);
+       }
+   }
+   .logo-icon {
+       font-size: 3.5rem;
+       color: var(--purple-glow);
+       margin-bottom: 20px;
+       opacity: 0.9;
+   }
+    .subtitle {
+       font-size: 1.5rem;
+       font-weight: 400;
+       margin-bottom: 10px;
+       opacity: 0.8;
+   }
+    .btn-primary-login i {
+       margin-right: 10px;
+   }
+   .footer-links {
+       margin-top: 50px;
+       font-size: 0.9rem;
+       opacity: 0.6;
+   }
+   .footer-links a:hover {
+       opacity: 1;
+   }
+   @media (max-width: 768px) {
+       .main-card-glass {
+           padding: 40px 30px;
+       }
+        .title-3d {
+           font-size: 3.5rem;
+           letter-spacing: 5px;
+       }
+        .subtitle {
+           font-size: 1.3rem;
+       }
+   }
+    @media (max-width: 480px) {
+       .title-3d {
+           font-size: 2.5rem;
+           letter-spacing: 3px;
+       }
+        .main-card-glass {
+           padding: 30px 20px;
+       }
+   }
+</style>
