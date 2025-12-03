@@ -120,3 +120,29 @@ func (g *GormRepository) GetQuestionIDs(formID string) ([]string, error) {
 	}
 	return questions, nil
 }
+func (g *GormRepository) GetQuestions() ([]*domain.Question, error) {
+	var questions []*dbQuestion
+	err := g.db.Find(&questions).Error
+	if err != nil {
+		return nil, err
+	}
+	qs := make([]*domain.Question, 0, len(questions))
+	for _, q := range questions {
+		pa := make([]*domain.PossibleAnswer, 0, len(q.QuestionPossibleAnswers))
+		for _, p := range q.QuestionPossibleAnswers {
+			pa = append(pa, &domain.PossibleAnswer{
+				Content: p.PossibleAnswer.Content,
+			})
+		}
+		qs = append(qs, &domain.Question{
+			Title:       q.Title,
+			Description: q.Description,
+			Type: domain.QuestionType{
+				Title: domain.QuestionTypeTitles(q.QuestionType.Title),
+			},
+			IsRequired:      q.IsRequired,
+			PossibleAnswers: pa,
+		})
+	}
+	return qs, nil
+}

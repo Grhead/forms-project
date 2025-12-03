@@ -45,7 +45,7 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, que
 		}
 		return form, nil
 	}
-	form, err = s.repository.GetForm(d.ID)
+	form, err = s.repository.GetForm(d.ID, false)
 	return form, nil
 }
 
@@ -69,9 +69,33 @@ func (s *FormsOrchestrator) CheckoutAnswers(formID string) (*domain.Form, error)
 			}
 		}
 	}
-	domainForm, err := s.repository.GetForm(formID)
+	domainForm, err := s.repository.GetForm(formID, false)
 	if err != nil {
 		return nil, err
 	}
 	return domainForm, nil
+}
+
+func (s *FormsOrchestrator) GetForm(ID string, isExternal bool) (*domain.Form, error) {
+	forms, err := s.repository.GetForm(ID, isExternal)
+	if err != nil {
+		return nil, err
+	}
+	return forms, nil
+}
+
+func (s *FormsOrchestrator) GetForms() ([]*domain.Form, error) {
+	forms, err := s.repository.GetForms()
+	if err != nil {
+		return nil, err
+	}
+	return forms, nil
+}
+
+func (s *FormsOrchestrator) GetQuestions() ([]*domain.Question, error) {
+	questions, err := s.repository.GetQuestions()
+	if err != nil {
+		return nil, err
+	}
+	return questions, nil
 }

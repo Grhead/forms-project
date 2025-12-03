@@ -19,10 +19,12 @@ type FormRepository interface {
 	CreatePossibleAnswer(pa *domain.PossibleAnswer, qID string) (*domain.PossibleAnswer, error)
 	createQuestionPossibleAnswer(pa *dbPossibleAnswer, qID string) error
 
-	GetForm(internalID string) (*domain.Form, error)
+	GetForm(internalID string, isExternal bool) (*domain.Form, error)
+	GetForms() ([]*domain.Form, error)
 	GetFormExternalID(internalID string) (string, error)
 	GetAnswers(formID string, questionID string) ([]*domain.Answer, error)
 	GetQuestionIDs(formID string) ([]string, error)
+	GetQuestions() ([]*domain.Question, error)
 	GetQuestionIDByTitle(qTitle string) (string, error)
 	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)
 	getFormsQuestionID(formID string, questinID string) (string, error)

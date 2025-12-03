@@ -28,6 +28,21 @@ func (g *GormRepository) CreateForm(f *domain.Form) error {
 	}
 	return nil
 }
+func (g *GormRepository) GetFormInternalID(externalID string) (string, error) {
+	var form []*dbForm
+	err := g.db.
+		Where("external_id = ?", externalID).
+		Limit(1).
+		Select("id").
+		Find(&form).Error
+	if err != nil {
+		return "", err
+	}
+	if len(form) == 0 {
+		return "", nil
+	}
+	return form[0].ID, nil
+}
 func (g *GormRepository) GetFormExternalID(internalID string) (string, error) {
 	var form []*dbForm
 	err := g.db.
@@ -44,11 +59,20 @@ func (g *GormRepository) GetFormExternalID(internalID string) (string, error) {
 	return form[0].ExternalID, nil
 }
 
-func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
+func (g *GormRepository) GetForm(ID string, isExternal bool) (*domain.Form, error) {
 	var forms []*dbForm
 	var domainQuestions []*domain.Question
-
-	err := g.db.
+	var internalID string
+	var err error
+	if isExternal {
+		internalID, err = g.GetFormInternalID(ID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		internalID = ID
+	}
+	err = g.db.
 		Preload("FormsQuestions.Question.QuestionType").
 		Preload("FormsQuestions.Question.QuestionPossibleAnswers.PossibleAnswer").
 		Where("id = ?", internalID).
@@ -93,4 +117,22 @@ func (g *GormRepository) GetForm(internalID string) (*domain.Form, error) {
 		Questions:     domainQuestions,
 	}
 	return &resultDomain, nil
+}
+
+func (g *GormRepository) GetForms() ([]*domain.Form, error) {
+	var dbForms []*dbForm
+	err := g.db.Find(&dbForms).Error
+	if err != nil {
+		return nil, err
+	}
+	forms := make([]*domain.Form, 0, len(dbForms))
+	for _, item := range dbForms {
+		forms = append(forms, &domain.Form{
+			ExternalID:    item.ExternalID,
+			Title:         item.Title,
+			DocumentTitle: item.DocumentTitle,
+			CreatedAt:     item.CreatedAt,
+		})
+	}
+	return forms, nil
 }

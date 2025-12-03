@@ -1,13 +1,18 @@
 package domain
 
-import "time"
+import (
+	"time"
+	"tusur-forms/internal/transport/dto"
+)
 
 type Answer struct {
 	SubmittedAt time.Time
 	Content     string
 }
 
-type PossibleAnswer struct {
-	Content string
+func (a *Answer) ToDTO() *dto.Answer {
+	return &dto.Answer{
+		SubmittedAt: a.SubmittedAt,
+		Content:     a.Content,
+	}
 }
-

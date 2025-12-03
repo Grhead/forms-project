@@ -9,7 +9,7 @@ import (
 	"tusur-forms/internal/repository"
 	"tusur-forms/internal/services/forms/google"
 	"tusur-forms/internal/services/orchectrators"
-	"tusur-forms/internal/services/reports"
+	"tusur-forms/internal/transport"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -69,17 +69,18 @@ func Run() error {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write(html)
 	})
+	transportEntity := transport.NewOrchestrator(newOrchestrator)
 
-	//r.Get("/questions", getTasks)    // Получить все задачи
-	//r.Post("/questions", createTask) // Создать новую задачу
-	//
-	//r.Get("/forms", getTasks)    // Получить все задачи
-	//r.Post("/forms", createTask) // Создать новую задачу
-	//
-	//r.Post("/generate", createTask) // Создать новую задачу
+	r.Get("/questions", transportEntity.GetQuestions)
+	r.Post("/questions", transportEntity.CreateQuestion)
 
-	// 4. Запускаем сервер
-	fmt.Println("Сервер запущен на http://localhost:3000")
+	r.Get("/form", transportEntity.GetForm)
+	r.Get("/forms", transportEntity.GetForms)
+	r.Post("/forms", transportEntity.CreateForm)
+
+	r.Post("/generate", transportEntity.GenerateXlsx)
+
+	fmt.Println("Server started on http://localhost:3000")
 	err = http.ListenAndServe(":3000", r)
 	if err != nil {
 		return err
@@ -115,36 +116,36 @@ func Run() error {
 	//if err != nil {
 	//	return err
 	//}
-	f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
-	if err != nil {
-		return err
-	}
-	log.Println(f.Print())
-
-	form, err := gormRepo.GetForm("ae66e57e-b0dd-4404-836c-9c5d015f0309")
-	if err != nil {
-		return err
-	}
-	if form == nil {
-		return fmt.Errorf("form does not exists")
-	}
-	log.Println(form.Print())
-	file := reports.CreateFile()
-	index, err := file.CreateSpreadsheet(form.Title)
-	if err != nil {
-		return err
-	}
-	err = file.SetHeader(index, form)
-	if err != nil {
-		return err
-	}
-	err = file.SetData(index, form)
-	if err != nil {
-		return err
-	}
-	err = file.SaveFile(index, "test.xlsx")
-	if err != nil {
-		return err
-	}
+	//f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
+	//if err != nil {
+	//	return err
+	//}
+	//log.Println(f.Print())
+	//
+	//form, err := gormRepo.GetForm("ae66e57e-b0dd-4404-836c-9c5d015f0309", false)
+	//if err != nil {
+	//	return err
+	//}
+	//if form == nil {
+	//	return fmt.Errorf("form does not exists")
+	//}
+	//log.Println(form.Print())
+	//file := reports.CreateFile()
+	//index, err := file.CreateSpreadsheet(form.Title)
+	//if err != nil {
+	//	return err
+	//}
+	//err = file.SetHeader(index, form)
+	//if err != nil {
+	//	return err
+	//}
+	//err = file.SetData(index, form)
+	//if err != nil {
+	//	return err
+	//}
+	//err = file.SaveFile(index, "test.xlsx")
+	//if err != nil {
+	//	return err
+	//}
 	return nil
 }
