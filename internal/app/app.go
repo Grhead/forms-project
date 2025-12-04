@@ -70,16 +70,16 @@ func Run() error {
 		w.Write(html)
 	})
 	transportEntity := transport.NewOrchestrator(newOrchestrator)
+	r.Route("/api", func(r chi.Router) {
+		r.Get("/questions", transportEntity.GetQuestions)
+		r.Post("/question", transportEntity.CreateQuestion)
 
-	r.Get("/questions", transportEntity.GetQuestions)
-	r.Post("/question", transportEntity.CreateQuestion)
+		r.Get("/form", transportEntity.GetForm)
+		r.Get("/forms", transportEntity.GetForms)
+		r.Post("/form", transportEntity.CreateForm)
 
-	r.Get("/form", transportEntity.GetForm)
-	r.Get("/forms", transportEntity.GetForms)
-	r.Post("/form", transportEntity.CreateForm)
-
-	r.Post("/generate", transportEntity.GenerateXlsx)
-
+		r.Post("/generate", transportEntity.GenerateXlsx)
+	})
 	fmt.Println("Server started on http://localhost:3000")
 	err = http.ListenAndServe(":3000", r)
 	if err != nil {
