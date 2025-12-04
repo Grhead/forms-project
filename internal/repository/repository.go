@@ -23,7 +23,7 @@ type FormRepository interface {
 	GetForms() ([]*domain.Form, error)
 	GetFormExternalID(internalID string) (string, error)
 	GetAnswers(formID string, questionID string) ([]*domain.Answer, error)
-	GetQuestionIDs(formID string) ([]string, error)
+	GetQuestionByTitle(qTitle string) (*domain.Question, error)
 	GetQuestions() ([]*domain.Question, error)
 	GetQuestionIDByTitle(qTitle string) (string, error)
 	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)

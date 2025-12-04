@@ -21,9 +21,9 @@ type ResponseQuestion struct {
 }
 
 type RequestForm struct {
-	Title         string             `json:"title"`
-	DocumentTitle string             `json:"documentTitle"`
-	Questions     []*RequestQuestion `json:"questions"`
+	Title         string   `json:"title"`
+	DocumentTitle string   `json:"documentTitle"`
+	Questions     []string `json:"questions"`
 }
 
 type RequestQuestion struct {

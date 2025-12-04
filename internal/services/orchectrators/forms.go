@@ -112,3 +112,11 @@ func (s *FormsOrchestrator) GetQuestions() ([]*domain.Question, error) {
 	}
 	return questions, nil
 }
+
+func (s *FormsOrchestrator) GetQuestion(questionTitle string) (*domain.Question, error) {
+	question, err := s.repository.GetQuestionByTitle(questionTitle)
+	if err != nil {
+		return nil, err
+	}
+	return question, nil
+}

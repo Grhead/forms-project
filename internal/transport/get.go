@@ -6,6 +6,14 @@ import (
 	"tusur-forms/internal/transport/dto"
 )
 
+// GetQuestions
+// @Summary Get questions
+// @Description Get all questions
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.ResponseQuestion
+// @Failure 500 {string} string "Internal error"
+// @Router /questions [get]
 func (o *Orchestrator) GetQuestions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	questions, err := o.FormsOrchestrator.GetQuestions()
@@ -20,6 +28,16 @@ func (o *Orchestrator) GetQuestions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(qs)
 }
 
+// GetForm
+// @Summary Get form
+// @Description Get form detail information
+// @Accept json
+// @Produce json
+// @Param form_id query string true "Form External ID"
+// @Success 200 {object} dto.ResponseForm
+// @Failure 404 {string} string "Not found error"
+// @Failure 500 {string} string "Internal error"
+// @Router /form [get]
 func (o *Orchestrator) GetForm(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	queryVals := r.URL.Query()
@@ -29,10 +47,22 @@ func (o *Orchestrator) GetForm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal error", 500)
 		return
 	}
+	if form == nil {
+		http.Error(w, "Form not found", 404)
+		return
+	}
 	f := form.ToDTO()
 	json.NewEncoder(w).Encode(f)
 }
 
+// GetForms
+// @Summary Get forms
+// @Description Get all forms
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.ResponseForm
+// @Failure 500 {string} string "Internal error"
+// @Router /forms [get]
 func (o *Orchestrator) GetForms(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	forms, err := o.FormsOrchestrator.GetForms()

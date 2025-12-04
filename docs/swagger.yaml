@@ -1,0 +1,194 @@
+basePath: /api
+definitions:
+  dto.PossibleAnswer:
+    properties:
+      content:
+        type: string
+    type: object
+  dto.RequestForm:
+    properties:
+      documentTitle:
+        type: string
+      questions:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  dto.RequestQuestion:
+    properties:
+      description:
+        type: string
+      isRequired:
+        type: boolean
+      possibleAnswers:
+        items:
+          $ref: '#/definitions/dto.PossibleAnswer'
+        type: array
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.ResponseForm:
+    properties:
+      createdAt:
+        type: string
+      documentTitle:
+        type: string
+      externalID:
+        type: string
+      questions:
+        items:
+          $ref: '#/definitions/dto.ResponseQuestion'
+        type: array
+      title:
+        type: string
+    type: object
+  dto.ResponseQuestion:
+    properties:
+      description:
+        type: string
+      isRequired:
+        type: boolean
+      possibleAnswers:
+        items:
+          $ref: '#/definitions/dto.PossibleAnswer'
+        type: array
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: This is tusur-forms-api
+  termsOfService: http://swagger.io/terms/
+  title: tusur-forms-api
+  version: "1.0"
+paths:
+  /form:
+    get:
+      consumes:
+      - application/json
+      description: Get form detail information
+      parameters:
+      - description: Form External ID
+        in: query
+        name: form_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ResponseForm'
+        "404":
+          description: Not found error
+          schema:
+            type: string
+        "500":
+          description: Internal error
+          schema:
+            type: string
+      summary: Get form
+    post:
+      consumes:
+      - application/json
+      description: Create form with details
+      parameters:
+      - description: Request form body
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ResponseForm'
+        "400":
+          description: Invalid data
+          schema:
+            type: string
+        "500":
+          description: Internal error
+          schema:
+            type: string
+      summary: Create form
+  /forms:
+    get:
+      consumes:
+      - application/json
+      description: Get all forms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ResponseForm'
+            type: array
+        "500":
+          description: Internal error
+          schema:
+            type: string
+      summary: Get forms
+  /question:
+    post:
+      consumes:
+      - application/json
+      description: Create question with details
+      parameters:
+      - description: Request question body
+        in: body
+        name: question
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RequestQuestion'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Invalid data
+          schema:
+            type: string
+        "500":
+          description: Internal error
+          schema:
+            type: string
+      summary: Create question
+  /questions:
+    get:
+      consumes:
+      - application/json
+      description: Get all questions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ResponseQuestion'
+            type: array
+        "500":
+          description: Internal error
+          schema:
+            type: string
+      summary: Get questions
+schemes:
+- http
+swagger: "2.0"

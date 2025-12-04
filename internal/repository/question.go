@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"log"
 	"tusur-forms/internal/domain"
 
 	"github.com/google/uuid"
@@ -113,17 +112,41 @@ func (g *GormRepository) GetQuestionIDByTitle(qTitle string) (string, error) {
 	return dbQ[0].ID, nil
 }
 
-func (g *GormRepository) GetQuestionIDs(formID string) ([]string, error) {
-	var questions []string
-	err := g.db.Table("db_forms_questions").Where("form_id = ?", formID).Select("question_id").Find(&questions).Error
+func (g *GormRepository) GetQuestionByTitle(qTitle string) (*domain.Question, error) {
+	var dbQ []*dbQuestion
+	err := g.db.
+		Preload("QuestionType").
+		Preload("QuestionPossibleAnswers.PossibleAnswer").
+		Where("title = ?", qTitle).Limit(1).Find(&dbQ).Error
 	if err != nil {
 		return nil, err
 	}
-	return questions, nil
+	if len(dbQ) == 0 {
+		return nil, nil
+	}
+	pa := make([]*domain.PossibleAnswer, 0, len(dbQ[0].QuestionPossibleAnswers))
+	for _, p := range dbQ[0].QuestionPossibleAnswers {
+		pa = append(pa, &domain.PossibleAnswer{
+			Content: p.PossibleAnswer.Content,
+		})
+	}
+	return &domain.Question{
+		Title:       dbQ[0].Title,
+		Description: dbQ[0].Description,
+		Type: domain.QuestionType{
+			Title: domain.QuestionTypeTitles(dbQ[0].QuestionType.Title),
+		},
+		IsRequired:      dbQ[0].IsRequired,
+		Answers:         nil,
+		PossibleAnswers: pa,
+	}, nil
 }
 func (g *GormRepository) GetQuestions() ([]*domain.Question, error) {
 	var questions []*dbQuestion
-	err := g.db.Find(&questions).Error
+	err := g.db.
+		Preload("QuestionType").
+		Preload("QuestionPossibleAnswers.PossibleAnswer").
+		Find(&questions).Error
 	if err != nil {
 		return nil, err
 	}

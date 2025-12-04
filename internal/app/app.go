@@ -11,10 +11,22 @@ import (
 	"tusur-forms/internal/services/orchectrators"
 	"tusur-forms/internal/transport"
 
+	_ "tusur-forms/docs"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// Run
+// @title tusur-forms-api
+// @version 1.0
+// @description This is tusur-forms-api
+// @termsOfService http://swagger.io/terms/
+// @host localhost:3000
+// @schemes http
+// @BasePath /api
 func Run() error {
 	ctx := context.Background()
 
@@ -63,13 +75,22 @@ func Run() error {
 		return err
 	}
 	newOrchestrator := orchectrators.NewFormsOrchestrator(service, gormRepo)
+	transportEntity := transport.NewOrchestrator(newOrchestrator)
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write(html)
 	})
-	transportEntity := transport.NewOrchestrator(newOrchestrator)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/questions", transportEntity.GetQuestions)
 		r.Post("/question", transportEntity.CreateQuestion)
@@ -85,6 +106,7 @@ func Run() error {
 	if err != nil {
 		return err
 	}
+
 	//f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
 	//if err != nil {
 	//	return err

@@ -2,11 +2,22 @@ package transport
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"tusur-forms/internal/domain"
 	"tusur-forms/internal/transport/dto"
 )
 
+// CreateQuestion
+// @Summary Create question
+// @Description Create question with details
+// @Accept json
+// @Produce json
+// @Param question body dto.RequestQuestion true "Request question body"
+// @Success 201 {string} string
+// @Failure 400 {string} string "Invalid data"
+// @Failure 500 {string} string "Internal error"
+// @Router /question [post]
 func (o *Orchestrator) CreateQuestion(w http.ResponseWriter, r *http.Request) {
 	var newQuestion dto.RequestQuestion
 
@@ -38,6 +49,16 @@ func (o *Orchestrator) CreateQuestion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(question)
 }
 
+// CreateForm
+// @Summary Create form
+// @Description Create form with details
+// @Accept json
+// @Produce json
+// @Param form body dto.RequestForm true "Request form body"
+// @Success 201 {object} dto.ResponseForm
+// @Failure 400 {string} string "Invalid data"
+// @Failure 500 {string} string "Internal error"
+// @Router /form [post]
 func (o *Orchestrator) CreateForm(w http.ResponseWriter, r *http.Request) {
 	var newForm dto.RequestForm
 
@@ -48,19 +69,12 @@ func (o *Orchestrator) CreateForm(w http.ResponseWriter, r *http.Request) {
 	}
 	var questions = make([]*domain.Question, 0, len(newForm.Questions))
 	for _, q := range newForm.Questions {
-		var pa = make([]*domain.PossibleAnswer, 0, len(q.PossibleAnswers))
-		for _, p := range q.PossibleAnswers {
-			pa = append(pa, &domain.PossibleAnswer{
-				Content: p.Content,
-			})
+		question, err := o.GetQuestion(q)
+		if err != nil {
+			return
 		}
-		questions = append(questions, &domain.Question{
-			Title:           q.Title,
-			Description:     q.Description,
-			Type:            domain.QuestionType{Title: domain.QuestionTypeTitles(q.Type)},
-			IsRequired:      q.IsRequired,
-			PossibleAnswers: pa,
-		})
+		log.Println(question)
+		questions = append(questions, question)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	form, err := o.FormsOrchestrator.CheckoutForm(newForm.Title, newForm.DocumentTitle, questions)

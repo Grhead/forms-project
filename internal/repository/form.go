@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"log"
 	"time"
 	"tusur-forms/internal/domain"
 )
@@ -77,7 +76,7 @@ func (g *GormRepository) GetForm(ID string, isExternal bool) (*domain.Form, erro
 		Preload("FormsQuestions.Question.QuestionType").
 		Preload("FormsQuestions.Question.QuestionPossibleAnswers.PossibleAnswer").
 		Where("id = ?", internalID).
-		First(&forms).Error
+		Find(&forms).Error
 	if err != nil {
 		return nil, err
 	}
@@ -122,17 +121,46 @@ func (g *GormRepository) GetForm(ID string, isExternal bool) (*domain.Form, erro
 
 func (g *GormRepository) GetForms() ([]*domain.Form, error) {
 	var dbForms []*dbForm
-	err := g.db.Find(&dbForms).Error
+	forms := make([]*domain.Form, 0, len(dbForms))
+
+	err := g.db.Preload("FormsQuestions.Question.QuestionType").
+		Preload("FormsQuestions.Question.QuestionPossibleAnswers.PossibleAnswer").
+		Find(&dbForms).Error
 	if err != nil {
 		return nil, err
 	}
-	forms := make([]*domain.Form, 0, len(dbForms))
-	for _, item := range dbForms {
+	for _, form := range dbForms {
+		var domainQuestions []*domain.Question
+		for _, item := range form.FormsQuestions {
+			q := item.Question
+			domainPossibleAnswers := make([]*domain.PossibleAnswer, 0, len(q.QuestionPossibleAnswers))
+			for _, inItem := range q.QuestionPossibleAnswers {
+				p := inItem.PossibleAnswer
+				domainPossibleAnswers = append(domainPossibleAnswers, &domain.PossibleAnswer{
+					Content: p.Content,
+				})
+			}
+			answers, err := g.GetAnswers(form.ID, q.ID)
+			if err != nil {
+				return nil, err
+			}
+			domainQuestions = append(domainQuestions, &domain.Question{
+				Title:       q.Title,
+				Description: q.Description,
+				Type: domain.QuestionType{
+					Title: domain.QuestionTypeTitles(q.QuestionType.Title),
+				},
+				IsRequired:      q.IsRequired,
+				Answers:         answers,
+				PossibleAnswers: domainPossibleAnswers,
+			})
+		}
 		forms = append(forms, &domain.Form{
-			ExternalID:    item.ExternalID,
-			Title:         item.Title,
-			DocumentTitle: item.DocumentTitle,
-			CreatedAt:     item.CreatedAt,
+			ExternalID:    form.ExternalID,
+			Title:         form.Title,
+			DocumentTitle: form.DocumentTitle,
+			CreatedAt:     form.CreatedAt,
+			Questions:     domainQuestions,
 		})
 	}
 	return forms, nil
