@@ -2,7 +2,6 @@ package transport
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"tusur-forms/internal/domain"
 	"tusur-forms/internal/transport/dto"
@@ -73,7 +72,6 @@ func (o *Orchestrator) CreateForm(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
-		log.Println(question)
 		questions = append(questions, question)
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -33,7 +33,7 @@ func (g *GormRepository) CreateQuestion(q *domain.Question) (string, error) {
 			return "", err
 		}
 	}
-	dbQID, err := g.GetQuestionIDByTitle(q.Title)
+	dbQID, err := g.GetQuestionIDByTitleAndDesc(q.Title, q.Description)
 	if err != nil {
 		return "", err
 	}
@@ -100,9 +100,9 @@ func (g *GormRepository) getQuestionTypeByTitle(qtTitle string) (*dbQuestionType
 	return dbQt[0], nil
 }
 
-func (g *GormRepository) GetQuestionIDByTitle(qTitle string) (string, error) {
+func (g *GormRepository) GetQuestionIDByTitleAndDesc(qTitle string, qDesc string) (string, error) {
 	var dbQ []*dbQuestion
-	err := g.db.Where("title = ?", qTitle).Limit(1).Find(&dbQ).Error
+	err := g.db.Where("title = ? AND description = ?", qTitle, qDesc).Limit(1).Find(&dbQ).Error
 	if err != nil {
 		return "", err
 	}

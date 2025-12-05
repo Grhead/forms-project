@@ -25,11 +25,11 @@ type FormRepository interface {
 	GetAnswers(formID string, questionID string) ([]*domain.Answer, error)
 	GetQuestionByTitle(qTitle string) (*domain.Question, error)
 	GetQuestions() ([]*domain.Question, error)
-	GetQuestionIDByTitle(qTitle string) (string, error)
+	GetQuestionIDByTitleAndDesc(qTitle string, qDesc string) (string, error)
 	getQuestionTypeByTitle(qtID string) (*dbQuestionType, error)
 	getFormsQuestionID(formID string, questinID string) (string, error)
 
-	CheckResponseEnvironmentExists(environment string) (bool, error)
+	checkResponseEnvironmentExists(environment string, formsQuestionID string) (bool, error)
 	Migrate() error
 	CheckExists() (bool, error)
 }

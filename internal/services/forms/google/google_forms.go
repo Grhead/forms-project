@@ -100,7 +100,7 @@ func (g *googleFormsAdapter) GetForm(formID string) (*service.FormUniqResp, erro
 			continue
 		}
 		googleQID := item.QuestionItem.Question.QuestionId
-		qInternalID, err := g.repository.GetQuestionIDByTitle(item.Title)
+		qInternalID, err := g.repository.GetQuestionIDByTitleAndDesc(item.Title, item.Description)
 		if err != nil || qInternalID == "" {
 			slog.Error("Failed to get question id by title", "question_title", item.Title, "form_id", formID, "error", err)
 			return nil, err

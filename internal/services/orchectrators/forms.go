@@ -42,15 +42,9 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, des
 			return nil, err
 		}
 		for i := range questions[0] {
-			isQuestionExists, err := s.repository.GetQuestionIDByTitle(questions[0][i].Title)
+			isQuestionExists, err := s.repository.CreateQuestion(questions[0][i])
 			if err != nil {
 				return nil, err
-			}
-			if isQuestionExists == "" {
-				isQuestionExists, err = s.repository.CreateQuestion(questions[0][i])
-				if err != nil {
-					return nil, err
-				}
 			}
 			err = s.repository.CreateFormsQuestion(d.ID, isQuestionExists)
 			if err != nil {
@@ -64,19 +58,13 @@ func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, des
 
 func (s *FormsOrchestrator) CheckoutAnswers(formID string) (*domain.Form, error) {
 	form, err := s.creator.GetForm(formID)
+
 	if err != nil {
 		return nil, err
 	}
-	for _, item := range form.Questions {
-		for _, f := range item.Answers {
-			exists, err := s.repository.CheckResponseEnvironmentExists(f.ResponseID)
-			if err != nil {
-				return nil, err
-			}
-			if exists {
-				continue
-			}
-			err = s.repository.CreateAnswer(f.ToDomain(), formID, item.ID, f.ResponseID)
+	for _, questionItem := range form.Questions {
+		for _, answerItem := range questionItem.Answers {
+			err = s.repository.CreateAnswer(answerItem.ToDomain(), formID, questionItem.ID, answerItem.ResponseID)
 			if err != nil {
 				return nil, err
 			}

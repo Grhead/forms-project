@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"tusur-forms/internal/config"
@@ -101,18 +100,11 @@ func Run() error {
 
 		r.Post("/generate", transportEntity.GenerateXlsx)
 	})
-	fmt.Println("Server started on http://localhost:3000")
-	err = http.ListenAndServe(":3000", r)
-	if err != nil {
-		return err
-	}
 
-	//f, err := newOrchestrator.CheckoutAnswers("ae66e57e-b0dd-4404-836c-9c5d015f0309")
+	//form, err := newOrchestrator.CheckoutAnswers("7df1df32-c91c-4cb3-ac62-8d04e3c6aa89")
 	//if err != nil {
 	//	return err
 	//}
-	//log.Println(f.Print())
-	//
 	//file := reports.CreateFile()
 	//index, err := file.CreateSpreadsheet(form.Title)
 	//if err != nil {
@@ -126,9 +118,23 @@ func Run() error {
 	//if err != nil {
 	//	return err
 	//}
+	//err = file.SetMediumQuestion(index, form)
+	//if err != nil {
+	//	return err
+	//}
+	//err = file.SetMediumDiscipline(index, form)
+	//if err != nil {
+	//	return err
+	//}
+	//
 	//err = file.SaveFile(index, "test.xlsx")
 	//if err != nil {
 	//	return err
 	//}
+	log.Println("Server started on http://localhost:3000")
+	err = http.ListenAndServe(":3000", r)
+	if err != nil {
+		return err
+	}
 	return nil
 }
