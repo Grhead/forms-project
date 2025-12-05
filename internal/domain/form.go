@@ -10,6 +10,7 @@ type Form struct {
 	ExternalID    string
 	Title         string
 	DocumentTitle string
+	Description   string
 	CreatedAt     time.Time
 	Questions     []*Question
 }
@@ -24,6 +25,7 @@ func (f *Form) ToDTO() *dto.ResponseForm {
 			ExternalID:    f.ExternalID,
 			Title:         f.Title,
 			DocumentTitle: f.DocumentTitle,
+			Description:   f.Description,
 			CreatedAt:     f.CreatedAt,
 			Questions:     qs,
 		}

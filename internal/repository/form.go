@@ -10,6 +10,7 @@ type dbForm struct {
 	Title          string
 	DocumentTitle  string
 	ExternalID     string
+	Description    string
 	CreatedAt      time.Time
 	FormsQuestions []*dbFormsQuestions `gorm:"foreignKey:FormID;references:ID"`
 }
@@ -21,6 +22,7 @@ func (g *GormRepository) CreateForm(f *domain.Form) error {
 		CreatedAt:     f.CreatedAt,
 		Title:         f.Title,
 		DocumentTitle: f.DocumentTitle,
+		Description:   f.Description,
 	}
 	err := g.db.Create(&dbF).Error
 	if err != nil {
@@ -113,6 +115,7 @@ func (g *GormRepository) GetForm(ID string, isExternal bool) (*domain.Form, erro
 		ExternalID:    form.ExternalID,
 		Title:         form.Title,
 		DocumentTitle: form.DocumentTitle,
+		Description:   form.Description,
 		CreatedAt:     form.CreatedAt,
 		Questions:     domainQuestions,
 	}
@@ -159,6 +162,7 @@ func (g *GormRepository) GetForms() ([]*domain.Form, error) {
 			ExternalID:    form.ExternalID,
 			Title:         form.Title,
 			DocumentTitle: form.DocumentTitle,
+			Description:   form.Description,
 			CreatedAt:     form.CreatedAt,
 			Questions:     domainQuestions,
 		})

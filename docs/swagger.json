@@ -209,6 +209,9 @@
         "dto.RequestForm": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "documentTitle": {
                     "type": "string"
                 },
@@ -250,6 +253,9 @@
             "type": "object",
             "properties": {
                 "createdAt": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "documentTitle": {

@@ -8,6 +8,7 @@ type ResponseForm struct {
 	ExternalID    string              `json:"externalID"`
 	Title         string              `json:"title"`
 	DocumentTitle string              `json:"documentTitle"`
+	Description   string              `json:"description"`
 	CreatedAt     time.Time           `json:"createdAt"`
 	Questions     []*ResponseQuestion `json:"questions"`
 }
@@ -23,6 +24,7 @@ type ResponseQuestion struct {
 type RequestForm struct {
 	Title         string   `json:"title"`
 	DocumentTitle string   `json:"documentTitle"`
+	Description   string   `json:"description"`
 	Questions     []string `json:"questions"`
 }
 

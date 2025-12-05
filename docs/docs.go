@@ -212,6 +212,9 @@ const docTemplate = `{
         "dto.RequestForm": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "documentTitle": {
                     "type": "string"
                 },
@@ -253,6 +256,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createdAt": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "documentTitle": {

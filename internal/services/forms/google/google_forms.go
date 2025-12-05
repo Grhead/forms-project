@@ -35,7 +35,7 @@ func (g *GoogleForms) NewService(ctx context.Context, r repository.FormRepositor
 	return adapter, nil
 }
 
-func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain.Form, error) {
+func (g *googleFormsAdapter) NewForm(title string, documentTitle string, description string) (domain.Form, error) {
 	gf := &forms.Form{
 		Info: &forms.Info{
 			Title:         title,
@@ -47,12 +47,30 @@ func (g *googleFormsAdapter) NewForm(title string, documentTitle string) (domain
 		slog.Error("Failed to create new GoogleForm", "err", err)
 		return domain.Form{}, err
 	}
+	var requests = make([]*forms.Request, 0, 1)
 
+	requests = append(requests, &forms.Request{
+		UpdateFormInfo: &forms.UpdateFormInfoRequest{
+			Info: &forms.Info{
+				Description: description,
+			},
+			UpdateMask: "Description",
+		},
+	})
+	_, err = g.googleClient.Forms.BatchUpdate(
+		result.FormId,
+		&forms.BatchUpdateFormRequest{Requests: requests}).
+		Do()
+	if err != nil {
+		slog.Error("Failed to batch update form", "external_id", result.FormId, "err", err)
+		return domain.Form{}, err
+	}
 	f := domain.Form{
 		ID:            uuid.NewString(),
 		ExternalID:    result.FormId,
 		Title:         result.Info.Title,
 		DocumentTitle: result.Info.DocumentTitle,
+		Description:   result.Info.Description,
 		CreatedAt:     time.Now(),
 		Questions:     nil,
 	}

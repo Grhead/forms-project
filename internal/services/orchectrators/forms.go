@@ -26,9 +26,9 @@ func (s *FormsOrchestrator) CheckoutQuestion(question *domain.Question) (string,
 	return createQuestionID, nil
 }
 
-func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, questions ...[]*domain.Question) (*domain.Form, error) {
+func (s *FormsOrchestrator) CheckoutForm(title string, documentTitle string, description string, questions ...[]*domain.Question) (*domain.Form, error) {
 	var form *domain.Form
-	d, err := s.creator.NewForm(title, documentTitle)
+	d, err := s.creator.NewForm(title, documentTitle, description)
 	if err != nil {
 		return nil, err
 	}

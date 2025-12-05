@@ -77,7 +77,7 @@ func (o *Orchestrator) CreateForm(w http.ResponseWriter, r *http.Request) {
 		questions = append(questions, question)
 	}
 	w.Header().Set("Content-Type", "application/json")
-	form, err := o.FormsOrchestrator.CheckoutForm(newForm.Title, newForm.DocumentTitle, questions)
+	form, err := o.FormsOrchestrator.CheckoutForm(newForm.Title, newForm.DocumentTitle, newForm.Description, questions)
 	if err != nil {
 		http.Error(w, "Internal error", 500)
 		return

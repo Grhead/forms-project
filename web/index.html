@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Tusur Forms UI — Fixed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="style.css">
+    </noscript>
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <div class="window-controls">
+                <div class="control-dot dot-close"></div>
+                <div class="control-dot dot-min"></div>
+                <div class="control-dot dot-max"></div>
+            </div>
+            <div class="app-title">
+                Tusur Forms UI
+            </div>
+            <button class="btn btn-icon-only" id="mobileMenuBtn" onclick="toggleMobileSidebar()">
+                ☰
+            </button>
+        </div>
+
+        <div class="toolbar" id="toolbar">
+            <button class="btn" id="btnForms" onclick="setSection('forms')">
+                📂 Формы
+            </button>
+            <button class="btn" id="btnNewQuestion" onclick="setSection('newQuestion')">
+                ➕ Вопрос
+            </button>
+            <button class="btn" id="btnNewForm" onclick="setSection('newForm')">
+                📝 Новая Форма
+            </button>
+        </div>
+
+        <div class="content-area">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-search">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Поиск..."
+                        oninput="filterList(this.value)">
+                </div>
+                <div class="sidebar-header" id="sidebarTitle" style="display:none">Список</div>
+                <div class="list-container" id="list">
+                </div>
+            </div>
+
+            <div class="workspace" id="workspace">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal-content" id="mainModal">
+            <h3 id="modalTitle"></h3>
+            <p id="modalMessage"></p>
+            <div id="modalActions" class="modal-actions"
+                style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;"></div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+</body>
+
+</html>

@@ -7,6 +7,8 @@ definitions:
     type: object
   dto.RequestForm:
     properties:
+      description:
+        type: string
       documentTitle:
         type: string
       questions:
@@ -34,6 +36,8 @@ definitions:
   dto.ResponseForm:
     properties:
       createdAt:
+        type: string
+      description:
         type: string
       documentTitle:
         type: string

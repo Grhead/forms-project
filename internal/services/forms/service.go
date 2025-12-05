@@ -11,6 +11,7 @@ type FormUniqResp struct {
 	ExternalID    string
 	Title         string
 	DocumentTitle string
+	Description   string
 	CreatedAt     time.Time
 	Questions     []*QuestionUniqResp
 }
@@ -41,6 +42,7 @@ func (f *FormUniqResp) ToDomain() *domain.Form {
 		ExternalID:    f.ExternalID,
 		Title:         f.Title,
 		DocumentTitle: f.DocumentTitle,
+		Description:   f.Description,
 		CreatedAt:     f.CreatedAt,
 		Questions:     questions,
 	}
@@ -73,7 +75,7 @@ type FormServiceProvider interface {
 }
 
 type FormService interface {
-	NewForm(title string, documentTitle string) (domain.Form, error)
+	NewForm(title string, documentTitle string, description string) (domain.Form, error)
 	GetForm(formID string) (*FormUniqResp, error)
 	SetQuestions(form *domain.Form, questions []*domain.Question) error
 }
